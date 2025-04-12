@@ -7,16 +7,98 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Import Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Custom styles -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>
   
-  <script type="module">
-    import React from 'react';
-    import ReactDOM from 'react-dom/client';
-    import App from './index.jsx';
+  <!-- Import React and ReactDOM from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+  
+  <!-- Babel pour transpiler JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Votre code d'application -->
+  <script type="text/babel">
+    // Destructurer les composants Lucide dont vous avez besoin
+    const { Search, Menu, X, MessageCircle, Check, AlertTriangle, User, Settings, LogOut, Home, Heart, Shield, Users } = LucideReact;
     
-    ReactDOM.createRoot(document.getElementById('root')).render(
+    const App = () => {
+      const [activeTab, React.useState('accueil')];
+      const [menuOpen, setMenuOpen] = React.useState(false);
+      const [filterOpen, setFilterOpen] = React.useState(false);
+      const [selectedDog, setSelectedDog] = React.useState(null);
+      
+      const toggleMenu = () => setMenuOpen(!menuOpen);
+      const toggleFilter = () => setFilterOpen(!filterOpen);
+      
+      // Couleurs basées sur le Pays Basque (rouge et vert)
+      const primaryColor = 'bg-red-700';
+      const secondaryColor = 'bg-green-700';
+      
+      // Données d'exemple (code raccourci pour la lisibilité)
+      const chiens = [
+        { 
+          id: 1, 
+          nom: 'Max', 
+          race: 'Border Collie', 
+          age: '2 ans', 
+          sexe: 'Mâle',
+          localisation: 'Refuge de Bayonne',
+          description: 'Max est un Border Collie énergique avec un fort instinct de troupeau. Il a déjà travaillé avec des moutons et apprend vite.',
+          statut: 'Disponible',
+          evaluation: 'Non évalué',
+          img: '/api/placeholder/400/320'
+        },
+        // Ajoutez les autres chiens ici
+      ];
+      
+      const eleveurs = [
+        {
+          id: 1,
+          nom: 'Ferme Etchegaray',
+          localisation: 'Hasparren',
+          cheptel: 'Moutons',
+          description: 'Exploitation familiale de 150 brebis laitières, recherche un chien de troupeau expérimenté.',
+          contact: 'Jean Etchegaray'
+        },
+        // Ajoutez les autres éleveurs ici
+      ];
+
+      // Ajoutez ici les fonctions renderDogCard, renderEleveurCard, renderContent, etc.
+      
+      return (
+        <div className="min-h-screen bg-gray-50">
+          {/* Header */}
+          <header className="bg-white shadow-sm border-b border-gray-200">
+            {/* Code du header */}
+          </header>
+
+          {/* Contenu principal */}
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {renderContent()}
+          </main>
+        </div>
+      );
+    };
+
+    // Rendu de l'application
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>

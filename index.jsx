@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Menu, X, MessageCircle, Check, AlertTriangle, User, Settings, LogOut, Home, Heart, Shield, Users } from 'lucide-react';
+import ReactDOM from 'react-dom/client';
+import './styles.css';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('accueil');
@@ -554,45 +556,3 @@ const App = () => {
                       <circle cx="8" cy="14" r="2" stroke="currentColor" strokeWidth="2"/>
                       <circle cx="16" cy="14" r="2" stroke="currentColor" strokeWidth="2"/>
                     </svg>
-                    Chiens
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => {setActiveTab('eleveurs'); toggleMenu();}} 
-                    className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'eleveurs' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
-                    <Users className="w-5 h-5 mr-3" />
-                    Éleveurs
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => {setActiveTab('profil'); toggleMenu();}} 
-                    className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'profil' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
-                    <User className="w-5 h-5 mr-3" />
-                    Mon Profil
-                  </button>
-                </li>
-                <li className="pt-4 mt-4 border-t border-gray-200">
-                  <button 
-                    className="flex items-center w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
-                  >
-                    <Settings className="w-5 h-5 mr-3" />
-                    Paramètres
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className="flex items-center w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
-                  >
-                    <LogOut className="w-5 h-5 mr-3" />
-                    Déconnexion
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      )'

@@ -1,0 +1,906 @@
+import React, { useState } from 'react';
+import { Search, Home, Dog, Users, Clipboard, Bell, Moon, Sun, Menu, X, Filter, Plus, Mail, MapPin, Heart, Share, CheckCircle, XCircle, User } from 'lucide-react';
+
+const App = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('accueil');
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleFilter = () => setFilterOpen(!filterOpen);
+
+  const mainClass = `min-h-screen transition-colors duration-300 ${
+    darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'
+  }`;
+
+  const cardClass = `rounded-xl shadow-lg p-6 transition-colors duration-300 ${
+    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+  }`;
+
+  const buttonClass = `py-2 px-4 rounded-lg font-medium transition-colors duration-200 ${
+    darkMode 
+      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+      : 'bg-blue-600 hover:bg-blue-700 text-white'
+  }`;
+
+  const secondaryButtonClass = `py-2 px-4 rounded-lg font-medium transition-colors duration-200 ${
+    darkMode 
+      ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+      : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+  }`;
+
+  const iconButtonClass = `p-3 rounded-full transition-colors duration-200 ${
+    darkMode 
+      ? 'hover:bg-gray-700 text-gray-300 hover:text-white' 
+      : 'hover:bg-gray-200 text-gray-600 hover:text-gray-900'
+  }`;
+
+  const tabClass = (tab) => `flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
+    activeTab === tab
+      ? darkMode
+        ? 'bg-blue-600 text-white'
+        : 'bg-blue-100 text-blue-700'
+      : darkMode
+        ? 'hover:bg-gray-700 text-gray-300'
+        : 'hover:bg-gray-200 text-gray-600'
+  }`;
+
+  // Exemples de données
+  const chiensDonneurs = [
+    {
+      id: 1,
+      nom: 'Max',
+      age: '3 ans',
+      race: 'Border Collie',
+      localisation: 'Refuge de Lyon',
+      description: 'Chien très actif, besoin de se dépenser. Abandonné car trop énergique pour appartement.',
+      statut: 'À évaluer',
+      image: '/api/placeholder/400/300'
+    },
+    {
+      id: 2,
+      nom: 'Sky',
+      age: '2 ans',
+      race: 'Border Collie / Berger Australien',
+      localisation: 'Particulier - Grenoble',
+      description: 'Chien intelligent avec forte motivation pour le travail. Besoin d\'un nouveau foyer suite déménagement.',
+      statut: 'Évalué - Recommandé',
+      image: '/api/placeholder/400/300'
+    },
+    {
+      id: 3,
+      nom: 'Bella',
+      age: '4 ans',
+      race: 'Beauceron',
+      localisation: 'Refuge d\'Annecy',
+      description: 'Expérience en garde de troupeau. Bon tempérament, calme et attentive.',
+      statut: 'Évalué - Recommandé',
+      image: '/api/placeholder/400/300'
+    }
+  ];
+
+  const eleveurs = [
+    {
+      id: 1,
+      nom: 'Ferme des Alpages',
+      localisation: 'Haute-Savoie',
+      troupeau: 'Ovins (250 têtes)',
+      recherche: 'Chien avec expérience, autonome',
+      image: '/api/placeholder/400/300'
+    },
+    {
+      id: 2,
+      nom: 'Bergerie du Vercors',
+      localisation: 'Isère',
+      troupeau: 'Ovins (120 têtes)',
+      recherche: 'Jeune chien à former',
+      image: '/api/placeholder/400/300'
+    }
+  ];
+
+  const evaluationsRecentes = [
+    {
+      id: 1,
+      chien: 'Marley - Berger Australien',
+      date: '05/04/2025',
+      resultat: 'Fort potentiel pour le travail',
+      statut: 'Recommandé'
+    },
+    {
+      id: 2,
+      chien: 'Roxy - Border Collie',
+      date: '02/04/2025',
+      resultat: 'Manque d\'intérêt pour le troupeau',
+      statut: 'Non recommandé'
+    }
+  ];
+
+  const renderNavigation = () => (
+    <nav className="space-y-2">
+      <button className={tabClass('accueil')} onClick={() => setActiveTab('accueil')}>
+        <Home className="w-5 h-5" />
+        <span>Tableau de bord</span>
+      </button>
+      <button className={tabClass('chiens')} onClick={() => setActiveTab('chiens')}>
+        <Dog className="w-5 h-5" />
+        <span>Chiens disponibles</span>
+      </button>
+      <button className={tabClass('eleveurs')} onClick={() => setActiveTab('eleveurs')}>
+        <Users className="w-5 h-5" />
+        <span>Éleveurs & Bergers</span>
+      </button>
+      <button className={tabClass('evaluations')} onClick={() => setActiveTab('evaluations')}>
+        <Clipboard className="w-5 h-5" />
+        <span>Évaluations</span>
+      </button>
+      <button className={tabClass('messages')} onClick={() => setActiveTab('messages')}>
+        <Mail className="w-5 h-5" />
+        <span>Messages</span>
+      </button>
+      <button className={tabClass('profil')} onClick={() => setActiveTab('profil')}>
+        <User className="w-5 h-5" />
+        <span>Mon profil</span>
+      </button>
+    </nav>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'accueil':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              
+              <div className={`lg:col-span-2 ${cardClass}`}>
+                <div className="flex justify-between items-center mb-4 pb-3 border-b border-opacity-20 border-gray-500">
+                  <div>
+                    <h3 className="font-semibold">Refuge de Lyon</h3>
+                    <div className="text-xs opacity-75">Dernier message il y a 2h</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className={iconButtonClass}>
+                      <Share className="w-5 h-5" />
+                    </button>
+                    <button className={iconButtonClass}>
+                      <Bell className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 h-96 overflow-y-auto px-2 py-4">
+                  <div className={`max-w-xs ml-auto p-3 rounded-lg ${darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                    <div className="text-sm">Bonjour, j'aimerais évaluer le Border Collie "Max" que vous avez recueilli récemment.</div>
+                    <div className="text-xs opacity-75 text-right mt-1">10:15</div>
+                  </div>
+                  
+                  <div className={`max-w-xs p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className="text-sm">Bonjour, bien sûr, Max est arrivé il y a 2 semaines. Quand pourriez-vous venir l'évaluer ?</div>
+                    <div className="text-xs opacity-75 text-right mt-1">10:20</div>
+                  </div>
+                  
+                  <div className={`max-w-xs ml-auto p-3 rounded-lg ${darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                    <div className="text-sm">Je peux passer ce jeudi à partir de 14h. Pourriez-vous me donner plus de détails sur son comportement ?</div>
+                    <div className="text-xs opacity-75 text-right mt-1">10:25</div>
+                  </div>
+                  
+                  <div className={`max-w-xs p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className="text-sm">Jeudi 14h nous convient. Max est très énergique mais a du mal avec la solitude. Son ancien propriétaire l'a abandonné car il était trop actif pour un appartement. Il connaît quelques commandes de base.</div>
+                    <div className="text-xs opacity-75 text-right mt-1">10:40</div>
+                  </div>
+                  
+                  <div className={`max-w-xs ml-auto p-3 rounded-lg ${darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                    <div className="text-sm">Merci pour ces infos. Je viens d'ajouter Max à notre système. A-t-il déjà été en contact avec du bétail ou des moutons ?</div>
+                    <div className="text-xs opacity-75 text-right mt-1">10:45</div>
+                  </div>
+                  
+                  <div className={`max-w-xs p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className="text-sm">Nous n'avons pas cette information. Son ancien propriétaire vivait en ville. Nous avons remarqué qu'il est très attentif aux mouvements et aime "rassembler" les autres chiens dans le parc.</div>
+                    <div className="text-xs opacity-75 text-right mt-1">11:00</div>
+                  </div>
+                  
+                  <div className={`max-w-xs ml-auto p-3 rounded-lg ${darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                    <div className="text-sm">C'est un bon signe ! Je vous confirme ma venue jeudi à 14h pour commencer l'évaluation. Je vous tiendrai informé des résultats.</div>
+                    <div className="text-xs opacity-75 text-right mt-1">11:15</div>
+                  </div>
+                  
+                  <div className={`max-w-xs p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className="text-sm">Nous avons bien reçu votre évaluation de Max. Les résultats sont très encourageants ! Plusieurs familles sont intéressées, mais nous préférerions un placement en milieu rural actif.</div>
+                    <div className="text-xs opacity-75 text-right mt-1">11:30</div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Écrivez votre message..." 
+                    className={`flex-1 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                  />
+                  <button className={buttonClass}>
+                    <span>Envoyer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'profil':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Mon profil</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className={`lg:col-span-1 ${cardClass}`}>
+                <div className="flex flex-col items-center">
+                  <div className={`w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold ${darkMode ? 'bg-blue-600' : 'bg-blue-100 text-blue-600'}`}>
+                    EC
+                  </div>
+                  <div className="mt-4 text-lg font-bold">Éducateur Canin Pro</div>
+                  <div className="text-sm opacity-75">Spécialiste chiens de troupeau</div>
+                  <div className="mt-2 text-sm">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      Haute-Savoie, France
+                    </span>
+                  </div>
+                  <button className={`mt-4 ${buttonClass} w-full`}>
+                    Modifier mon profil
+                  </button>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-opacity-20 border-gray-500">
+                  <h3 className="font-semibold mb-4">Statistiques</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Évaluations réalisées</span>
+                      <span className="font-medium">42</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Placements réussis</span>
+                      <span className="font-medium">38</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Taux de réussite</span>
+                      <span className="font-medium">90%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Membre depuis</span>
+                      <span className="font-medium">Juin 2024</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`lg:col-span-2 space-y-6`}>
+                <div className={cardClass}>
+                  <h3 className="font-semibold mb-4">Informations personnelles</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm mb-1">Nom complet</label>
+                      <input 
+                        type="text" 
+                        value="Marc Berger" 
+                        className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">Email</label>
+                      <input 
+                        type="email" 
+                        value="marc.berger@example.com" 
+                        className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">Téléphone</label>
+                      <input 
+                        type="tel" 
+                        value="06 12 34 56 78" 
+                        className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">Localisation</label>
+                      <input 
+                        type="text" 
+                        value="Annecy, Haute-Savoie" 
+                        className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm mb-1">Bio professionnelle</label>
+                    <textarea 
+                      rows="4" 
+                      className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none`}
+                      defaultValue="Éducateur canin spécialisé dans les chiens de troupeau depuis 15 ans. Certification en comportement canin et expérience avec plus de 200 chiens. Travaille en collaboration avec des éleveurs dans toute la région."
+                    ></textarea>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <button className={buttonClass}>
+                      Enregistrer les modifications
+                    </button>
+                  </div>
+                </div>
+                
+                <div className={cardClass}>
+                  <h3 className="font-semibold mb-4">Paramètres du compte</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Mode sombre</div>
+                        <div className="text-sm opacity-75">Changer l'apparence de l'application</div>
+                      </div>
+                      <button 
+                        onClick={toggleDarkMode} 
+                        className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${darkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+                      >
+                        <span className={`absolute w-5 h-5 rounded-full top-0.5 transition-transform duration-300 ${darkMode ? 'bg-white transform translate-x-6' : 'bg-white translate-x-0.5'}`}></span>
+                      </button>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Notifications par email</div>
+                        <div className="text-sm opacity-75">Recevoir des alertes par email</div>
+                      </div>
+                      <button className={`w-12 h-6 rounded-full relative bg-blue-600`}>
+                        <span className={`absolute w-5 h-5 rounded-full bg-white top-0.5 transform translate-x-6`}></span>
+                      </button>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Notifications push</div>
+                        <div className="text-sm opacity-75">Recevoir des alertes sur l'appareil</div>
+                      </div>
+                      <button className={`w-12 h-6 rounded-full relative bg-blue-600`}>
+                        <span className={`absolute w-5 h-5 rounded-full bg-white top-0.5 transform translate-x-6`}></span>
+                      </button>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Profil public</div>
+                        <div className="text-sm opacity-75">Visible par tous les utilisateurs</div>
+                      </div>
+                      <button className={`w-12 h-6 rounded-full relative bg-gray-300`}>
+                        <span className={`absolute w-5 h-5 rounded-full bg-white top-0.5 translate-x-0.5`}></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );<h2 className="text-2xl font-bold">Tableau de bord</h2>
+              <div className="flex gap-2">
+                <button 
+                  className={secondaryButtonClass}
+                  onClick={toggleFilter}
+                >
+                  <Filter className="w-5 h-5" />
+                </button>
+                <button className={buttonClass}>
+                  <span className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    Ajouter
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {filterOpen && (
+              <div className={cardClass}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Filtres</h3>
+                  <button onClick={toggleFilter}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm mb-1">Race</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Toutes les races</option>
+                      <option>Border Collie</option>
+                      <option>Berger Australien</option>
+                      <option>Beauceron</option>
+                      <option>Kelpie</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">Âge</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Tous les âges</option>
+                      <option>Moins de 2 ans</option>
+                      <option>2-5 ans</option>
+                      <option>Plus de 5 ans</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">Statut</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Tous</option>
+                      <option>À évaluer</option>
+                      <option>Évalué - Recommandé</option>
+                      <option>Évalué - Non recommandé</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end gap-2">
+                  <button className={secondaryButtonClass}>Réinitialiser</button>
+                  <button className={buttonClass}>Appliquer</button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className={cardClass}>
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <Dog className="w-5 h-5" />
+                  <span>Chiens à évaluer</span>
+                </h3>
+                <div className="text-3xl font-bold">5</div>
+                <div className="mt-4 text-sm opacity-75">2 nouveaux cette semaine</div>
+              </div>
+              <div className={cardClass}>
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  <span>Demandes d'éleveurs</span>
+                </h3>
+                <div className="text-3xl font-bold">8</div>
+                <div className="mt-4 text-sm opacity-75">3 en attente de réponse</div>
+              </div>
+              <div className={cardClass}>
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Placements réussis</span>
+                </h3>
+                <div className="text-3xl font-bold">12</div>
+                <div className="mt-4 text-sm opacity-75">+2 ce mois-ci</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className={cardClass}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Évaluations récentes</h3>
+                  <button className="text-sm text-blue-500 hover:underline">Voir tout</button>
+                </div>
+                <div className="space-y-4">
+                  {evaluationsRecentes.map(eval => (
+                    <div key={eval.id} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <div className="flex justify-between">
+                        <div className="font-medium">{eval.chien}</div>
+                        <div className="text-sm">{eval.date}</div>
+                      </div>
+                      <div className="text-sm mt-1">{eval.resultat}</div>
+                      <div className={`text-sm mt-2 inline-block px-2 py-1 rounded-full font-medium ${
+                        eval.statut === 'Recommandé' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {eval.statut}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={cardClass}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Demandes récentes d'éleveurs</h3>
+                  <button className="text-sm text-blue-500 hover:underline">Voir tout</button>
+                </div>
+                <div className="space-y-4">
+                  {eleveurs.map(eleveur => (
+                    <div key={eleveur.id} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <div className="flex justify-between">
+                        <div className="font-medium">{eleveur.nom}</div>
+                        <div className="flex items-center text-sm">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {eleveur.localisation}
+                        </div>
+                      </div>
+                      <div className="text-sm mt-1">Troupeau: {eleveur.troupeau}</div>
+                      <div className="text-sm mt-1">Recherche: {eleveur.recherche}</div>
+                      <div className="mt-2 flex justify-end gap-2">
+                        <button className="text-sm text-blue-500 hover:underline">Contacter</button>
+                        <button className="text-sm text-blue-500 hover:underline">Proposer un chien</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'messages':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Messages</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className={`lg:col-span-1 ${cardClass}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Conversations</h3>
+                  <button className={iconButtonClass}>
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className={`mb-4 relative rounded-full flex items-center ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-3 py-2`}>
+                  <Search className="w-5 h-5 opacity-60" />
+                  <input 
+                    type="text" 
+                    placeholder="Rechercher..." 
+                    className={`ml-2 bg-transparent border-none focus:outline-none text-sm w-full ${darkMode ? 'placeholder-gray-400' : 'placeholder-gray-500'}`}
+                  />
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {[
+                    { id: 1, name: "Refuge de Lyon", unread: true, time: "11:30" },
+                    { id: 2, name: "Marie Dupont (Particulier)", unread: false, time: "Hier" },
+                    { id: 3, name: "Bergerie du Vercors", unread: false, time: "08/04" },
+                    { id: 4, name: "Association Chiens de Berger", unread: false, time: "07/04" },
+                    { id: 5, name: "Jean Martin (Éleveur)", unread: false, time: "05/04" }
+                  ].map(contact => (
+                    <div key={contact.id} className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      contact.id === 1 
+                        ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'
+                        : darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                    }`}>
+                      <div className="flex justify-between">
+                        <div className={`font-medium ${contact.unread && contact.id !== 1 ? 'font-semibold' : ''}`}>{contact.name}</div>
+                        <div className="text-xs opacity-75">{contact.time}</div>
+                      </div>
+                      <div className="text-sm truncate mt-1">
+                        {contact.id === 1 ? "Nous avons bien reçu votre évaluation de Max..." : "Dernier message de la conversation..."}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+      case 'chiens':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Chiens disponibles</h2>
+              <div className="flex gap-2">
+                <button 
+                  className={secondaryButtonClass}
+                  onClick={toggleFilter}
+                >
+                  <Filter className="w-5 h-5" />
+                </button>
+                <button className={buttonClass}>
+                  <span className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    Ajouter un chien
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {filterOpen && (
+              <div className={cardClass}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Filtres</h3>
+                  <button onClick={toggleFilter}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm mb-1">Race</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Toutes les races</option>
+                      <option>Border Collie</option>
+                      <option>Berger Australien</option>
+                      <option>Beauceron</option>
+                      <option>Kelpie</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">Âge</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Tous les âges</option>
+                      <option>Moins de 2 ans</option>
+                      <option>2-5 ans</option>
+                      <option>Plus de 5 ans</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">Statut</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Tous</option>
+                      <option>À évaluer</option>
+                      <option>Évalué - Recommandé</option>
+                      <option>Évalué - Non recommandé</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end gap-2">
+                  <button className={secondaryButtonClass}>Réinitialiser</button>
+                  <button className={buttonClass}>Appliquer</button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {chiensDonneurs.map(chien => (
+                <div key={chien.id} className={cardClass}>
+                  <img 
+                    src={chien.image} 
+                    alt={chien.nom} 
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-bold">{chien.nom}</h3>
+                      <div className="mt-1 text-sm opacity-75">{chien.race} • {chien.age}</div>
+                    </div>
+                    <div className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      chien.statut === 'À évaluer' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : chien.statut === 'Évalué - Recommandé'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                    }`}>
+                      {chien.statut}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm mt-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{chien.localisation}</span>
+                  </div>
+                  <p className="mt-3 text-sm">{chien.description}</p>
+                  <div className="mt-4 flex justify-between">
+                    <button className={secondaryButtonClass}>
+                      <span className="flex items-center gap-1">
+                        <Clipboard className="w-4 h-4" />
+                        Détails
+                      </span>
+                    </button>
+                    <div className="flex gap-2">
+                      <button className={iconButtonClass}>
+                        <Heart className="w-5 h-5" />
+                      </button>
+                      <button className={iconButtonClass}>
+                        <Share className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'eleveurs':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Éleveurs & Bergers</h2>
+              <div className="flex gap-2">
+                <button 
+                  className={secondaryButtonClass}
+                  onClick={toggleFilter}
+                >
+                  <Filter className="w-5 h-5" />
+                </button>
+                <button className={buttonClass}>
+                  <span className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    Ajouter un éleveur
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {filterOpen && (
+              <div className={cardClass}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Filtres</h3>
+                  <button onClick={toggleFilter}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm mb-1">Localisation</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Toutes régions</option>
+                      <option>Auvergne-Rhône-Alpes</option>
+                      <option>Occitanie</option>
+                      <option>Provence-Alpes-Côte d'Azur</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">Type de troupeau</label>
+                    <select className={`w-full p-2 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <option>Tous types</option>
+                      <option>Ovins</option>
+                      <option>Bovins</option>
+                      <option>Caprins</option>
+                      <option>Mixte</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end gap-2">
+                  <button className={secondaryButtonClass}>Réinitialiser</button>
+                  <button className={buttonClass}>Appliquer</button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {eleveurs.map(eleveur => (
+                <div key={eleveur.id} className={cardClass}>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <img 
+                      src={eleveur.image} 
+                      alt={eleveur.nom} 
+                      className="w-full md:w-1/3 h-48 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold">{eleveur.nom}</h3>
+                      <div className="flex items-center gap-1 text-sm mt-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>{eleveur.localisation}</span>
+                      </div>
+                      <div className="mt-3">
+                        <div className="text-sm"><span className="font-medium">Troupeau:</span> {eleveur.troupeau}</div>
+                        <div className="text-sm mt-1"><span className="font-medium">Recherche:</span> {eleveur.recherche}</div>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <button className={buttonClass}>
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-4 h-4" />
+                            Contacter
+                          </span>
+                        </button>
+                        <button className={secondaryButtonClass}>
+                          <span className="flex items-center gap-1">
+                            <Dog className="w-4 h-4" />
+                            Proposer un chien
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'evaluations':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Évaluations</h2>
+              <button className={buttonClass}>
+                <span className="flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  Nouvelle évaluation
+                </span>
+              </button>
+            </div>
+
+            <div className={cardClass}>
+              <h3 className="text-lg font-semibold mb-4">Procédure d'évaluation</h3>
+              <div className="space-y-4">
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</div>
+                    <div className="font-medium">Test de tempérament initial</div>
+                  </div>
+                  <p className="ml-10 mt-2 text-sm">Évaluation du comportement général, sociabilité, et réactivité</p>
+                </div>
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">2</div>
+                    <div className="font-medium">Évaluation de l'instinct</div>
+                  </div>
+                  <p className="ml-10 mt-2 text-sm">Test d'intérêt pour le troupeau, réaction face aux moutons/bovins</p>
+                </div>
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</div>
+                    <div className="font-medium">Capacité d'apprentissage</div>
+                  </div>
+                  <p className="ml-10 mt-2 text-sm">Évaluation de la réactivité aux commandes et facilité d'apprentissage</p>
+                </div>
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">4</div>
+                    <div className="font-medium">Rapport complet</div>
+                  </div>
+                  <p className="ml-10 mt-2 text-sm">Rédaction d'un rapport détaillé et recommandation pour placement</p>
+                </div>
+              </div>
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Évaluations en cours</h3>
+                <button className="text-sm text-blue-500 hover:underline">Voir tout</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className={`text-left ${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+                      <th className="pb-2">Chien</th>
+                      <th className="pb-2">Race</th>
+                      <th className="pb-2">Date d'évaluation</th>
+                      <th className="pb-2">Recommandation</th>
+                      <th className="pb-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {evaluationsRecentes.map((eval, index) => (
+                      <tr key={eval.id} className={`${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+                        <td className="py-3">{eval.chien.split('-')[0].trim()}</td>
+                        <td className="py-3">{eval.chien.split('-')[1].trim()}</td>
+                        <td className="py-3">{eval.date}</td>
+                        <td className="py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            eval.statut === 'Recommandé' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {eval.statut}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex gap-2">
+                            <button className="text-blue-500 hover:underline">Voir rapport</button>
+                            <button className="text-blue-500 hover:underline">Proposer</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div><table className="w-full">
+                  <thead>
+                    <tr className={`text-left ${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+                      <th className="pb-2">Chien</th>
+                      <th className="pb-2">Race</th>
+                      <th className="pb-2">Date début</th>
+                      <th className="pb-2">Phase actuelle</th>
+                      <th className="pb-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className={`${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+                      <td className="py-3">Charlie</td>
+                      <td className="py-3">Border Collie</td>
+                      <td className="py-3">08/04/2025</td>
+                      <td className="py-3">Instinct troupeau</td>
+                      <td className="py-3">
+                        <button className="text-blue-500 hover:underline">Continuer</button>
+                      </td>
+                    </tr>
+                    <tr className={`${darkMode ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+                      <td className="py-3">Luna</td>
+                      <td className="py-3">Berger Australien</td>
+                      <td className="py-3">06/04/2025</td>
+                      <td className="py-3">Tempérament</td>
+                      <td className="py-3">
+                        <button className="text-blue-500 hover:underline">Continuer</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Évaluations terminées</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Filtrer:</span>
+                  <select className={`text-sm p-1 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                    <option>Tous</option>
+                    <option>Recommandés</option>
+                    <option>Non recommandés</option>
+                  </select>
+                </div>
+              </div>
+              <div className="overflow-x-auto">

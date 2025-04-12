@@ -24,18 +24,117 @@
 <body>
   <div id="root"></div>
   
-  <!-- Import React and ReactDOM from CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+  <!-- Import React et ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.min.js"></script>
   
   <!-- Babel pour transpiler JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <!-- Votre code d'application -->
   <script type="text/babel">
-    // Destructurer les composants Lucide dont vous avez besoin
-    const { Search, Menu, X, MessageCircle, Check, AlertTriangle, User, Settings, LogOut, Home, Heart, Shield, Users } = LucideReact;
+    // Définition des composants d'icônes
+    const Search = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-search ${className}`} {...props}>
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    );
+    
+    const Menu = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-menu ${className}`} {...props}>
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    );
+    
+    const X = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-x ${className}`} {...props}>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    );
+    
+    const MessageCircle = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-message-circle ${className}`} {...props}>
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </svg>
+    );
+    
+    const Check = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-check ${className}`} {...props}>
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    );
+    
+    const AlertTriangle = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-alert-triangle ${className}`} {...props}>
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    );
+    
+    const User = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-user ${className}`} {...props}>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    );
+    
+    const Home = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-home ${className}`} {...props}>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    );
+    
+    const Heart = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-heart ${className}`} {...props}>
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    );
+    
+    const Shield = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-shield ${className}`} {...props}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    );
+    
+    const Users = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-users ${className}`} {...props}>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+    
+    const Settings = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-settings ${className}`} {...props}>
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    );
+    
+    const LogOut = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-log-out ${className}`} {...props}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+    );
+    
+    // Icône personnalisée pour les chiens
+    const DogIcon = ({className = "", size = 24, ...props}) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`custom-icon ${className}`} {...props}>
+        <path d="M4 9l7.5-5 7.5 5v8.5c0 .83-.67 1.5-1.5 1.5h-12c-.83 0-1.5-.67-1.5-1.5V9z" />
+        <path d="M16 3v4" />
+        <circle cx="8" cy="14" r="2" />
+        <circle cx="16" cy="14" r="2" />
+      </svg>
+    );
     
     const App = () => {
       const [activeTab, setActiveTab] = React.useState('accueil');
@@ -312,3 +411,358 @@
                       <h4 className="font-medium text-gray-800">Compatibilité</h4>
                       <p className="mt-1 text-sm text-gray-600">Recommandations personnalisées pour le placement idéal.</p>
                     </div>
+                  </div>
+                  <button className={`mt-6 px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
+                    En savoir plus sur l'évaluation
+                  </button>
+                </div>
+              </div>
+            );
+          case 'chiens':
+            return (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-800">Chiens disponibles</h2>
+                  <button 
+                    onClick={toggleFilter}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition"
+                  >
+                    <Search className="w-4 h-4" />
+                    Filtrer
+                  </button>
+                </div>
+                
+                {filterOpen && (
+                  <div className="bg-white rounded-xl shadow-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Race</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                          <option value="">Toutes les races</option>
+                          <option value="border">Border Collie</option>
+                          <option value="berger">Berger des Pyrénées</option>
+                          <option value="aussie">Berger Australien</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Âge</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                          <option value="">Tous les âges</option>
+                          <option value="junior">Moins de 2 ans</option>
+                          <option value="adulte">2 à 5 ans</option>
+                          <option value="senior">Plus de 5 ans</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                          <option value="">Tous les statuts</option>
+                          <option value="disponible">Disponible</option>
+                          <option value="evaluation">En évaluation</option>
+                          <option value="evalue">Évalué</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
+                        Appliquer les filtres
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {chiens.map(renderDogCard)}
+                </div>
+              </div>
+            );
+          case 'eleveurs':
+            return (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Éleveurs recherchant un chien</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {eleveurs.map(renderEleveurCard)}
+                </div>
+                <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+                  <h3 className="text-lg font-bold text-gray-800">Vous êtes éleveur ?</h3>
+                  <p className="mt-2 text-gray-600">
+                    Inscrivez-vous gratuitement pour publier votre recherche de chien de troupeau. 
+                    Notre service d'évaluation vous garantit un chien adapté à vos besoins.
+                  </p>
+                  <button className={`mt-4 px-4 py-2 rounded-lg font-medium text-white ${secondaryColor} hover:bg-green-800 transition`}>
+                    Inscription éleveur
+                  </button>
+                </div>
+              </div>
+            );
+          case 'profil':
+            return (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Mon profil</h2>
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center">
+                    <div className={`w-16 h-16 rounded-full ${primaryColor} flex items-center justify-center text-white text-xl font-bold`}>
+                      JP
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-bold text-gray-800">Jean Puentes</h3>
+                      <p className="text-gray-600">Éducateur canin spécialisé</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 space-y-4">
+                    <div className="p-4 rounded-lg bg-gray-50">
+                      <h4 className="font-medium text-gray-800">Mes informations</h4>
+                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-sm text-gray-500">Email</span>
+                          <p className="text-gray-700">jean.puentes@example.com</p>
+                        </div>
+                        <div>
+                          <span className="text-sm text-gray-500">Téléphone</span>
+                          <p className="text-gray-700">06 XX XX XX XX</p>
+                        </div>
+                        <div>
+                          <span className="text-sm text-gray-500">Localisation</span>
+                          <p className="text-gray-700">Hasparren, Pays Basque</p>
+                        </div>
+                        <div>
+                          <span className="text-sm text-gray-500">Spécialité</span>
+                          <p className="text-gray-700">Chiens de troupeau, Border Collie</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 rounded-lg bg-gray-50">
+                      <h4 className="font-medium text-gray-800">Mes services</h4>
+                      <ul className="mt-2 space-y-2">
+                        <li className="flex items-center gap-2 text-gray-700">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Évaluation comportementale
+                        </li>
+                        <li className="flex items-center gap-2 text-gray-700">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Test avec troupeau
+                        </li>
+                        <li className="flex items-center gap-2 text-gray-700">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Formation de base
+                        </li>
+                        <li className="flex items-center gap-2 text-gray-700">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Suivi post-placement
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 flex gap-4">
+                    <button className="px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
+                      Modifier mon profil
+                    </button>
+                    <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
+                      Gérer mes annonces
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          default:
+            return <div>Page non trouvée</div>;
+        }
+      };
+      
+      return (
+        <div className="min-h-screen bg-gray-50">
+          {/* Header */}
+          <header className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center h-16">
+                <div className="flex items-center">
+                  <button className="md:hidden mr-2" onClick={toggleMenu}>
+                    <Menu className="w-6 h-6 text-gray-700" />
+                  </button>
+                  <div className="flex items-center">
+                    <div className={`w-10 h-10 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold`}>BC</div>
+                    <span className="ml-2 text-xl font-bold text-gray-800">Berger Connect</span>
+                  </div>
+                </div>
+                
+                <div className="hidden md:flex items-center space-x-6">
+                  <button 
+                    onClick={() => setActiveTab('accueil')} 
+                    className={`font-medium ${activeTab === 'accueil' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Accueil
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('chiens')} 
+                    className={`font-medium ${activeTab === 'chiens' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Chiens
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('eleveurs')} 
+                    className={`font-medium ${activeTab === 'eleveurs' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Éleveurs
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('profil')} 
+                    className={`font-medium ${activeTab === 'profil' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Mon Profil
+                  </button>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="relative rounded-full bg-gray-100 px-3 py-2 hidden md:flex items-center">
+                    <Search className="w-5 h-5 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Rechercher..." 
+                      className="ml-2 bg-transparent border-none focus:outline-none text-sm w-32 lg:w-64"
+                    />
+                  </div>
+                  
+                  <button className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-700" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Mobile Menu */}
+          {menuOpen && (
+            <div className="fixed inset-0 z-50 md:hidden">
+              <div className="fixed inset-0 bg-black opacity-50" onClick={toggleMenu}></div>
+              <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
+                <div className="p-4 border-b">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold text-sm`}>BC</div>
+                      <span className="ml-2 font-bold text-gray-800">Berger Connect</span>
+                    </div>
+                    <button onClick={toggleMenu}>
+                      <X className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+                <nav className="p-4">
+                  <ul className="space-y-2">
+                    <li>
+                      <button 
+                        onClick={() => {setActiveTab('accueil'); toggleMenu();}} 
+                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'accueil' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <Home className="w-5 h-5 mr-3" />
+                        Accueil
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => {setActiveTab('chiens'); toggleMenu();}} 
+                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'chiens' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <DogIcon className="w-5 h-5 mr-3" />
+                        Chiens
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => {setActiveTab('eleveurs'); toggleMenu();}} 
+                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'eleveurs' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <Users className="w-5 h-5 mr-3" />
+                        Éleveurs
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => {setActiveTab('profil'); toggleMenu();}} 
+                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'profil' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <User className="w-5 h-5 mr-3" />
+                        Mon Profil
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          )}
+
+          {/* Contenu principal */}
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {renderContent()}
+          </main>
+          
+          {/* Footer */}
+          <footer className="bg-gray-800 text-white mt-12">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <div className="flex items-center">
+                    <div className={`w-10 h-10 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold`}>BC</div>
+                    <span className="ml-2 text-xl font-bold">Berger Connect</span>
+                  </div>
+                  <p className="mt-4 text-gray-400">
+                    Service de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes. 
+                    Évaluation professionnelle pour garantir le placement idéal.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-bold mb-4">Navigation</h3>
+                  <ul className="space-y-2">
+                    <li><button onClick={() => setActiveTab('accueil')} className="text-gray-400 hover:text-white">Accueil</button></li>
+                    <li><button onClick={() => setActiveTab('chiens')} className="text-gray-400 hover:text-white">Chiens disponibles</button></li>
+                    <li><button onClick={() => setActiveTab('eleveurs')} className="text-gray-400 hover:text-white">Éleveurs</button></li>
+                    <li><button onClick={() => setActiveTab('profil')} className="text-gray-400 hover:text-white">Mon profil</button></li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-bold mb-4">Contact</h3>
+                  <p className="text-gray-400">
+                    Jean Puentes<br />
+                    Éducateur canin spécialisé<br />
+                    Hasparren, Pays Basque<br />
+                    contact@bergerconnect.fr<br />
+                    06 XX XX XX XX
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-8 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
+                <p className="text-gray-400">© 2025 Berger Connect. Tous droits réservés.</p>
+                <div className="mt-4 md:mt-0 flex space-x-4">
+                  <a href="#" className="text-gray-400 hover:text-white">Mentions légales</a>
+                  <a href="#" className="text-gray-400 hover:text-white">Politique de confidentialité</a>
+                  <a href="#" className="text-gray-400 hover:text-white">CGU</a>
+                </div>
+              </div>
+            </div>
+          </footer>
+          
+          {/* Bouton d'aide flottant */}
+          <div className="fixed bottom-6 right-6">
+            <button className={`w-14 h-14 rounded-full ${secondaryColor} text-white shadow-lg flex items-center justify-center hover:bg-green-800 transition`}>
+              <MessageCircle className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // Rendu de l'application
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  </script>
+</body>
+</html>

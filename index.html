@@ -38,7 +38,7 @@
     const { Search, Menu, X, MessageCircle, Check, AlertTriangle, User, Settings, LogOut, Home, Heart, Shield, Users } = LucideReact;
     
     const App = () => {
-      const [activeTab, React.useState('accueil')];
+      const [activeTab, setActiveTab] = React.useState('accueil');
       const [menuOpen, setMenuOpen] = React.useState(false);
       const [filterOpen, setFilterOpen] = React.useState(false);
       const [selectedDog, setSelectedDog] = React.useState(null);
@@ -50,7 +50,7 @@
       const primaryColor = 'bg-red-700';
       const secondaryColor = 'bg-green-700';
       
-      // Données d'exemple (code raccourci pour la lisibilité)
+      // Données d'exemple
       const chiens = [
         { 
           id: 1, 
@@ -64,7 +64,30 @@
           evaluation: 'Non évalué',
           img: '/api/placeholder/400/320'
         },
-        // Ajoutez les autres chiens ici
+        { 
+          id: 2, 
+          nom: 'Luna', 
+          race: 'Border Collie', 
+          age: '3 ans', 
+          sexe: 'Femelle',
+          localisation: 'Particulier à Saint-Jean-de-Luz',
+          description: 'Luna est une chienne calme et attentive. Son ancien propriétaire l\'utilisait pour le troupeau mais ne peut plus la garder.',
+          statut: 'En évaluation',
+          evaluation: 'En cours',
+          img: '/api/placeholder/400/320'
+        },
+        { 
+          id: 3, 
+          nom: 'Orion', 
+          race: 'Berger des Pyrénées', 
+          age: '1 an', 
+          sexe: 'Mâle',
+          localisation: 'Refuge d\'Anglet',
+          description: 'Jeune berger pyrénéen avec beaucoup d\'énergie. N\'a jamais travaillé avec des troupeaux mais montre des prédispositions.',
+          statut: 'Disponible',
+          evaluation: 'Non évalué',
+          img: '/api/placeholder/400/320'
+        }
       ];
       
       const eleveurs = [
@@ -76,33 +99,216 @@
           description: 'Exploitation familiale de 150 brebis laitières, recherche un chien de troupeau expérimenté.',
           contact: 'Jean Etchegaray'
         },
-        // Ajoutez les autres éleveurs ici
+        {
+          id: 2,
+          nom: 'GAEC des Montagnes',
+          localisation: 'Tardets-Sorholus',
+          cheptel: 'Moutons et quelques vaches',
+          description: 'Élevage en montagne, besoin d\'un chien endurant et habitué au terrain difficile.',
+          contact: 'Marie Lasalle'
+        }
       ];
 
-      // Ajoutez ici les fonctions renderDogCard, renderEleveurCard, renderContent, etc.
-      
-      return (
-        <div className="min-h-screen bg-gray-50">
-          {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-200">
-            {/* Code du header */}
-          </header>
-
-          {/* Contenu principal */}
-          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {renderContent()}
-          </main>
+      // Fonction pour rendre les cartes de chiens
+      const renderDogCard = (chien) => (
+        <div 
+          key={chien.id} 
+          className="rounded-xl shadow-lg overflow-hidden bg-white cursor-pointer transform transition hover:scale-105"
+          onClick={() => setSelectedDog(chien)}
+        >
+          <img src={chien.img} alt={chien.nom} className="w-full h-48 object-cover" />
+          <div className="p-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800">{chien.nom}</h3>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                chien.statut === 'Disponible' ? 'bg-blue-100 text-blue-800' : 
+                chien.statut === 'En évaluation' ? 'bg-yellow-100 text-yellow-800' : 
+                'bg-green-100 text-green-800'
+              }`}>
+                {chien.statut}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 mt-1">{chien.race}, {chien.age}</p>
+            <p className="text-sm text-gray-600">{chien.localisation}</p>
+            <div className="mt-3 flex items-center">
+              {chien.evaluation === 'Non évalué' ? (
+                <AlertTriangle className="w-4 h-4 text-yellow-500 mr-1" />
+              ) : chien.evaluation === 'En cours' ? (
+                <div className="w-4 h-4 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin mr-1"></div>
+              ) : (
+                <Check className="w-4 h-4 text-green-500 mr-1" />
+              )}
+              <span className="text-xs text-gray-500">{chien.evaluation}</span>
+            </div>
+          </div>
         </div>
       );
-    };
-
-    // Rendu de l'application
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    );
-  </script>
-</body>
-</html>
+    
+      // Fonction pour rendre les cartes d'éleveurs
+      const renderEleveurCard = (eleveur) => (
+        <div key={eleveur.id} className="bg-white rounded-xl shadow-lg p-4 transition hover:shadow-xl">
+          <h3 className="font-bold text-gray-800">{eleveur.nom}</h3>
+          <p className="text-sm text-gray-600 mt-1">{eleveur.localisation}</p>
+          <p className="text-sm text-gray-600">Cheptel: {eleveur.cheptel}</p>
+          <p className="text-sm text-gray-700 mt-2">{eleveur.description}</p>
+          <div className="mt-3 flex justify-between items-center">
+            <span className="text-xs text-gray-500">Contact: {eleveur.contact}</span>
+            <button className="flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900">
+              <MessageCircle className="w-4 h-4" />
+              Contacter
+            </button>
+          </div>
+        </div>
+      );
+  
+      // Fonction principale pour afficher le contenu selon l'onglet actif
+      const renderContent = () => {
+        if (selectedDog) {
+          return (
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="relative">
+                <img src={selectedDog.img} alt={selectedDog.nom} className="w-full h-64 object-cover" />
+                <button 
+                  onClick={() => setSelectedDog(null)}
+                  className="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-800">{selectedDog.nom}</h2>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    selectedDog.statut === 'Disponible' ? 'bg-blue-100 text-blue-800' : 
+                    selectedDog.statut === 'En évaluation' ? 'bg-yellow-100 text-yellow-800' : 
+                    'bg-green-100 text-green-800'
+                  }`}>
+                    {selectedDog.statut}
+                  </span>
+                </div>
+                
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div className="text-gray-600">
+                    <span className="text-sm font-medium">Race</span>
+                    <p>{selectedDog.race}</p>
+                  </div>
+                  <div className="text-gray-600">
+                    <span className="text-sm font-medium">Âge</span>
+                    <p>{selectedDog.age}</p>
+                  </div>
+                  <div className="text-gray-600">
+                    <span className="text-sm font-medium">Sexe</span>
+                    <p>{selectedDog.sexe}</p>
+                  </div>
+                  <div className="text-gray-600">
+                    <span className="text-sm font-medium">Localisation</span>
+                    <p>{selectedDog.localisation}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-gray-800">Description</h3>
+                  <p className="mt-2 text-gray-600">{selectedDog.description}</p>
+                </div>
+                
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-gray-800">Évaluation</h3>
+                  <div className="mt-2 p-4 rounded-lg bg-gray-50">
+                    {selectedDog.evaluation === 'Non évalué' ? (
+                      <div className="flex items-center text-yellow-700">
+                        <AlertTriangle className="w-5 h-5 mr-2" />
+                        <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation.</p>
+                      </div>
+                    ) : selectedDog.evaluation === 'En cours' ? (
+                      <div className="flex items-center text-blue-700">
+                        <div className="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
+                        <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-green-700">
+                        <Check className="w-5 h-5 mr-2" />
+                        <p>{selectedDog.evaluation}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mt-8 flex gap-4">
+                  <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
+                    Contacter le propriétaire
+                  </button>
+                  <button className={`px-4 py-2 rounded-lg font-medium text-white ${secondaryColor} hover:bg-green-800 transition`}>
+                    Demander une évaluation
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        switch (activeTab) {
+          case 'accueil':
+            return (
+              <div className="space-y-6">
+                <div className="p-6 rounded-xl bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg">
+                  <h2 className="text-2xl font-bold">Bienvenue sur Berger Connect</h2>
+                  <p className="mt-2">Votre plateforme de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes.</p>
+                  <div className="mt-6 flex gap-4">
+                    <button 
+                      onClick={() => setActiveTab('chiens')}
+                      className="px-4 py-2 bg-white text-red-700 rounded-lg font-medium hover:bg-gray-100 transition"
+                    >
+                      Voir les chiens disponibles
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('eleveurs')}
+                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 transition"
+                    >
+                      Voir les éleveurs
+                    </button>
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-800">Derniers chiens ajoutés</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {chiens.slice(0, 3).map(renderDogCard)}
+                </div>
+                
+                <div className="flex justify-center mt-6">
+                  <button 
+                    onClick={() => setActiveTab('chiens')}
+                    className="px-4 py-2 text-red-700 font-medium hover:underline"
+                  >
+                    Voir tous les chiens →
+                  </button>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-800 mt-8">Notre service d'évaluation</h3>
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <p className="text-gray-600">
+                    En tant qu'éducateur canin spécialisé en chiens de troupeau, je propose un service d'évaluation complet
+                    pour s'assurer que chaque chien est placé dans un environnement adapté à ses capacités.
+                  </p>
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-lg bg-red-50 border border-red-100">
+                      <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
+                        <Shield className="w-6 h-6 text-red-700" />
+                      </div>
+                      <h4 className="font-medium text-gray-800">Évaluation comportementale</h4>
+                      <p className="mt-1 text-sm text-gray-600">Analyse du tempérament et des aptitudes naturelles du chien.</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-green-50 border border-green-100">
+                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                        <Users className="w-6 h-6 text-green-700" />
+                      </div>
+                      <h4 className="font-medium text-gray-800">Test avec le troupeau</h4>
+                      <p className="mt-1 text-sm text-gray-600">Mise en situation réelle avec différents types de bétail.</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
+                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                        <Heart className="w-6 h-6 text-blue-700" />
+                      </div>
+                      <h4 className="font-medium text-gray-800">Compatibilité</h4>
+                      <p className="mt-1 text-sm text-gray-600">Recommandations personnalisées pour le placement idéal.</p>
+                    </div>

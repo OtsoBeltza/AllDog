@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
+      color: #333;
     }
     * { box-sizing: border-box; }
     
@@ -36,6 +37,9 @@
     .text-basque-red {
       color: #D0202A;
     }
+    .text-basque-green {
+      color: #278C45;
+    }
     .hover\:text-basque-red-dark:hover {
       color: #A7171F;
     }
@@ -48,10 +52,13 @@
     .bg-basque-white {
       background-color: #FFFFFF;
     }
+    .bg-basque-cream {
+      background-color: #F8F5F0;
+    }
   </style>
 </head>
-<body>
-  <div id="app" class="min-h-screen bg-gray-50">
+<body class="bg-basque-cream">
+  <div id="app" class="min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,7 +87,144 @@
           
           <div class="flex items-center gap-4">
             <div class="relative rounded-full bg-gray-100 px-3 py-2 hidden md:flex items-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation.</p>
+          </div>
+        `;
+      } else if (chien.evaluation === 'En cours') {
+        evaluationContent = `
+          <div class="flex items-center text-blue-700">
+            <div class="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
+            <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
+          </div>
+        `;
+      } else {
+        evaluationContent = `
+          <div class="flex items-center text-green-700">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <p>${chien.evaluation}</p>
+          </div>
+        `;
+      }
+      
+      content.innerHTML = `
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="dogModalOverlay"></div>
+        <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-90vh overflow-auto z-10">
+          <div class="relative">
+            <div class="h-64 bg-gray-200 flex items-center justify-center">
+              <span class="text-gray-400">Image</span>
+            </div>
+            <button id="closeModalBtn" class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="p-6">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-bold text-gray-800">${chien.nom}</h2>
+              <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColorClass}">
+                ${chien.statut}
+              </span>
+            </div>
+            
+            <div class="mt-4 grid grid-cols-2 gap-4">
+              <div class="text-gray-700">
+                <span class="text-sm font-medium">Race</span>
+                <p>${chien.race}</p>
+              </div>
+              <div class="text-gray-700">
+                <span class="text-sm font-medium">Âge</span>
+                <p>${chien.age}</p>
+              </div>
+              <div class="text-gray-700">
+                <span class="text-sm font-medium">Sexe</span>
+                <p>${chien.sexe}</p>
+              </div>
+              <div class="text-gray-700">
+                <span class="text-sm font-medium">Localisation</span>
+                <p>${chien.localisation}</p>
+              </div>
+            </div>
+            
+            <div class="mt-6">
+              <h3 class="text-lg font-medium text-gray-800">Description</h3>
+              <p class="mt-2 text-gray-700">${chien.description}</p>
+            </div>
+            
+            <div class="mt-6">
+              <h3 class="text-lg font-medium text-gray-800">Évaluation</h3>
+              <div class="mt-2 p-4 rounded-lg bg-gray-50">
+                ${evaluationContent}
+              </div>
+            </div>
+            
+            <div class="mt-8 flex gap-4">
+              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+                Contacter le propriétaire
+              </button>
+              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+                Demander une évaluation
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(content);
+      
+      // Empêcher le défilement du body
+      document.body.style.overflow = 'hidden';
+      
+      // Gestionnaire d'événements pour fermer la modale
+      document.getElementById('closeModalBtn').addEventListener('click', () => {
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+      });
+      
+      document.getElementById('dogModalOverlay').addEventListener('click', () => {
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+      });
+    }
+    
+    function scrollToInscriptionChien() {
+      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:first-child');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ajouter une classe pour mettre en évidence
+        element.classList.add('ring-2', 'ring-basque-red', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-basque-red', 'ring-opacity-50');
+        }, 2000);
+      }
+    }
+    
+    function scrollToInscriptionEleveur() {
+      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:last-child');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ajouter une classe pour mettre en évidence
+        element.classList.add('ring-2', 'ring-basque-green', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-basque-green', 'ring-opacity-50');
+        }, 2000);
+      }
+    }
+
+    // Démarrer l'application après le chargement du DOM
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>linecap="round" stroke-linejoin="round" class="text-gray-400">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -192,6 +336,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4" id="chiens-container">
           <!-- Les chiens seront ajoutés ici par JavaScript -->
         </div>
+        
+        <!-- Section lien avec Artzainak -->
+        <div class="mt-8 p-6 rounded-xl bg-white shadow-lg border-l-4 border-basque-green">
+          <h3 class="text-xl font-bold text-gray-800">En partenariat avec Artzainak</h3>
+          <p class="mt-2 text-gray-700">
+            Berger Connect est associé à <strong>Artzainak</strong>, notre activité de cours de chien de troupeau et d'écopaturage pour particuliers. 
+            Découvrez nos services d'éducation canine spécialisée sur <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">artzainak.netlify.app</a>.
+          </p>
+        </div>
       </div>
 
       <div id="chiens-content" class="hidden">
@@ -216,7 +369,7 @@
         
         <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
           <h3 class="text-xl font-bold text-gray-800">Vous avez un chien à placer ?</h3>
-          <p class="mt-2 text-gray-600">
+          <p class="mt-2 text-gray-700">
             Si vous êtes propriétaire d'un chien de troupeau que vous ne pouvez plus garder, ou si vous représentez un refuge, 
             vous pouvez soumettre votre chien à notre service d'évaluation avant placement.
           </p>
@@ -234,7 +387,7 @@
         
         <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
           <h3 class="text-lg font-bold text-gray-800">Vous êtes éleveur ?</h3>
-          <p class="mt-2 text-gray-600">
+          <p class="mt-2 text-gray-700">
             Inscrivez-vous gratuitement pour publier votre recherche de chien de troupeau. 
             Notre service d'évaluation vous garantit un chien adapté à vos besoins.
           </p>
@@ -246,7 +399,7 @@
       
       <div id="evaluation-content" class="hidden">
         <h2 class="text-2xl font-bold text-gray-800">Notre méthode d'évaluation</h2>
-        <p class="mt-2 text-gray-600">En tant qu'éducateur canin spécialisé en chiens de troupeau, je propose un service complet d'évaluation pour garantir le placement idéal de chaque chien.</p>
+        <p class="mt-2 text-gray-700">En tant qu'éducateur canin spécialisé en chiens de troupeau, je propose un service complet d'évaluation pour garantir le placement idéal de chaque chien.</p>
         
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="bg-white rounded-xl shadow-lg p-6">
@@ -256,10 +409,10 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-800">Phase 1 : Évaluation comportementale</h3>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-gray-700">
               Le chien est d'abord évalué sur ses caractéristiques comportementales générales :
             </p>
-            <ul class="mt-3 space-y-2 text-gray-600">
+            <ul class="mt-3 space-y-2 text-gray-700">
               <li class="flex items-start">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#278C45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 mt-1">
                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -297,10 +450,10 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-800">Phase 2 : Test avec le troupeau</h3>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-gray-700">
               Le chien est mis en situation réelle avec différents types de bétail pour évaluer :
             </p>
-            <ul class="mt-3 space-y-2 text-gray-600">
+            <ul class="mt-3 space-y-2 text-gray-700">
               <li class="flex items-start">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#278C45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 mt-1">
                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -335,10 +488,10 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-800">Phase 3 : Rapport de compatibilité</h3>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-gray-700">
               Après les phases d'évaluation, un rapport détaillé est établi :
             </p>
-            <ul class="mt-3 space-y-2 text-gray-600">
+            <ul class="mt-3 space-y-2 text-gray-700">
               <li class="flex items-start">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#278C45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 mt-1">
                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -369,24 +522,23 @@
         
         <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
           <h3 class="text-xl font-bold text-gray-800">Durée et déroulement</h3>
-          <p class="mt-2 text-gray-600">
+          <p class="mt-2 text-gray-700">
             L'évaluation complète d'un chien prend généralement entre 3 et 5 jours, selon son expérience préalable et sa réactivité. 
             Les tests sont effectués dans notre centre d'évaluation à Hasparren, où nous disposons de plusieurs types de troupeaux 
             (brebis laitières Manech, moutons, quelques vaches) sur différents terrains (plaine et coteau).
           </p>
           
-          <h4 class="text-lg font-bold text-gray-800 mt-4">Tarifs</h4>
-          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="border border-gray-200 rounded-lg p-4">
-              <h5 class="font-bold text-basque-red">Évaluation standard</h5>
-              <p class="text-gray-600 mt-1">3 jours d'évaluation complète avec rapport détaillé</p>
-              <p class="text-lg font-bold mt-2">150€</p>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-4">
-              <h5 class="font-bold text-basque-red">Évaluation + Formation de base</h5>
-              <p class="text-gray-600 mt-1">5 jours incluant l'initiation aux commandes essentielles</p>
-              <p class="text-lg font-bold mt-2">250€</p>
-            </div>
+          <div class="mt-6 p-4 bg-basque-cream rounded-lg border-l-4 border-basque-green">
+            <h4 class="text-lg font-bold text-basque-green">Service gratuit</h4>
+            <p class="mt-2 text-gray-700">
+              Dans le cadre du lancement de Berger Connect, notre service d'évaluation est actuellement proposé <strong>gratuitement</strong>. 
+              Cette initiative est menée en partenariat avec notre activité Artzainak, spécialisée dans l'éducation des chiens de troupeau et l'écopaturage.
+            </p>
+            <p class="mt-2 text-gray-700">
+              <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">
+                Découvrez Artzainak →
+              </a>
+            </p>
           </div>
           
           <button class="mt-6 px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
@@ -475,7 +627,7 @@
                     </div>
                     <h4 class="ml-4 text-lg font-bold text-gray-800">Inscrire un chien</h4>
                   </div>
-                  <p class="mt-3 text-gray-600">
+                  <p class="mt-3 text-gray-700">
                     Vous avez un chien de troupeau à placer ? Inscrivez-le pour bénéficier de notre service d'évaluation et 
                     trouver un éleveur adapté à ses capacités.
                   </p>
@@ -496,7 +648,7 @@
                     </div>
                     <h4 class="ml-4 text-lg font-bold text-gray-800">Inscrire un élevage</h4>
                   </div>
-                  <p class="mt-3 text-gray-600">
+                  <p class="mt-3 text-gray-700">
                     Vous êtes éleveur à la recherche d'un chien de troupeau ? Inscrivez-vous pour décrire vos besoins et 
                     être mis en relation avec des chiens évalués.
                   </p>
@@ -523,6 +675,9 @@
             <p class="mt-4 text-gray-400">
               Service de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes. 
               Évaluation professionnelle pour garantir le placement idéal.
+            </p>
+            <p class="mt-2 text-gray-400">
+              En partenariat avec <a href="https://artzainak.netlify.app" class="text-basque-green hover:text-white transition" target="_blank">Artzainak</a> - Cours de chien de troupeau et écopaturage.
             </p>
           </div>
           
@@ -825,11 +980,11 @@
               ${chien.statut}
             </span>
           </div>
-          <p class="text-sm text-gray-600 mt-1">${chien.race}, ${chien.age}</p>
-          <p class="text-sm text-gray-600">${chien.localisation}</p>
+          <p class="text-sm text-gray-700 mt-1">${chien.race}, ${chien.age}</p>
+          <p class="text-sm text-gray-700">${chien.localisation}</p>
           <div class="mt-3 flex items-center">
             ${evaluationIcon}
-            <span class="text-xs text-gray-500">${chien.evaluation}</span>
+            <span class="text-xs text-gray-700">${chien.evaluation}</span>
           </div>
         </div>
       `;
@@ -849,11 +1004,11 @@
         div.className = 'bg-white rounded-xl shadow-lg p-4 transition hover:shadow-xl';
         div.innerHTML = `
           <h3 class="font-bold text-gray-800">${eleveur.nom}</h3>
-          <p class="text-sm text-gray-600 mt-1">${eleveur.localisation}</p>
-          <p class="text-sm text-gray-600">Cheptel: ${eleveur.cheptel}</p>
+          <p class="text-sm text-gray-700 mt-1">${eleveur.localisation}</p>
+          <p class="text-sm text-gray-700">Cheptel: ${eleveur.cheptel}</p>
           <p class="text-sm text-gray-700 mt-2">${eleveur.description}</p>
           <div class="mt-3 flex justify-between items-center">
-            <span class="text-xs text-gray-500">Contact: ${eleveur.contact}</span>
+            <span class="text-xs text-gray-700">Contact: ${eleveur.contact}</span>
             <button class="flex items-center gap-1 text-sm font-medium text-basque-red hover:text-basque-red-dark">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
@@ -886,141 +1041,4 @@
       if (chien.evaluation === 'Non évalué') {
         evaluationContent = `
           <div class="flex items-center text-yellow-700">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation.</p>
-          </div>
-        `;
-      } else if (chien.evaluation === 'En cours') {
-        evaluationContent = `
-          <div class="flex items-center text-blue-700">
-            <div class="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
-            <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
-          </div>
-        `;
-      } else {
-        evaluationContent = `
-          <div class="flex items-center text-green-700">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <p>${chien.evaluation}</p>
-          </div>
-        `;
-      }
-      
-      content.innerHTML = `
-        <div class="fixed inset-0 bg-black bg-opacity-50" id="dogModalOverlay"></div>
-        <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-90vh overflow-auto z-10">
-          <div class="relative">
-            <div class="h-64 bg-gray-200 flex items-center justify-center">
-              <span class="text-gray-400">Image</span>
-            </div>
-            <button id="closeModalBtn" class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-          
-          <div class="p-6">
-            <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-bold text-gray-800">${chien.nom}</h2>
-              <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColorClass}">
-                ${chien.statut}
-              </span>
-            </div>
-            
-            <div class="mt-4 grid grid-cols-2 gap-4">
-              <div class="text-gray-600">
-                <span class="text-sm font-medium">Race</span>
-                <p>${chien.race}</p>
-              </div>
-              <div class="text-gray-600">
-                <span class="text-sm font-medium">Âge</span>
-                <p>${chien.age}</p>
-              </div>
-              <div class="text-gray-600">
-                <span class="text-sm font-medium">Sexe</span>
-                <p>${chien.sexe}</p>
-              </div>
-              <div class="text-gray-600">
-                <span class="text-sm font-medium">Localisation</span>
-                <p>${chien.localisation}</p>
-              </div>
-            </div>
-            
-            <div class="mt-6">
-              <h3 class="text-lg font-medium text-gray-800">Description</h3>
-              <p class="mt-2 text-gray-600">${chien.description}</p>
-            </div>
-            
-            <div class="mt-6">
-              <h3 class="text-lg font-medium text-gray-800">Évaluation</h3>
-              <div class="mt-2 p-4 rounded-lg bg-gray-50">
-                ${evaluationContent}
-              </div>
-            </div>
-            
-            <div class="mt-8 flex gap-4">
-              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-                Contacter le propriétaire
-              </button>
-              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-                Demander une évaluation
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(content);
-      
-      // Empêcher le défilement du body
-      document.body.style.overflow = 'hidden';
-      
-      // Gestionnaire d'événements pour fermer la modale
-      document.getElementById('closeModalBtn').addEventListener('click', () => {
-        document.body.removeChild(content);
-        document.body.style.overflow = '';
-      });
-      
-      document.getElementById('dogModalOverlay').addEventListener('click', () => {
-        document.body.removeChild(content);
-        document.body.style.overflow = '';
-      });
-    }
-    
-    function scrollToInscriptionChien() {
-      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:first-child');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Ajouter une classe pour mettre en évidence
-        element.classList.add('ring-2', 'ring-basque-red', 'ring-opacity-50');
-        setTimeout(() => {
-          element.classList.remove('ring-2', 'ring-basque-red', 'ring-opacity-50');
-        }, 2000);
-      }
-    }
-    
-    function scrollToInscriptionEleveur() {
-      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:last-child');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Ajouter une classe pour mettre en évidence
-        element.classList.add('ring-2', 'ring-basque-green', 'ring-opacity-50');
-        setTimeout(() => {
-          element.classList.remove('ring-2', 'ring-basque-green', 'ring-opacity-50');
-        }, 2000);
-      }
-    }
-
-    // Démarrer l'application après le chargement du DOM
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
-</body>
-</html>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-

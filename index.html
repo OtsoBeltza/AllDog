@@ -167,22 +167,16 @@
               </div>
             </div>
             
-            <div class="mt-6">
-              <h3 class="text-lg font-medium text-gray-800">Lien avec Artzainak</h3>
-              <div class="mt-2 p-4 rounded-lg bg-basque-cream border-l-4 border-basque-green">
-                <p class="text-gray-700">
-                  Notre service d'évaluation et de placement est réalisé en collaboration avec <strong>Artzainak</strong>, 
-                  spécialisé dans l'éducation des chiens de troupeau et l'écopâturage.
-                </p>
-                <p class="mt-2">
-                  <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline font-medium" target="_blank">
-                    En savoir plus sur Artzainak →
-                  </a>
-                </p>
-              </div>
+            <div class="mt-6 p-4 bg-basque-cream rounded-lg border-l-4 border-basque-green">
+              <h4 class="text-lg font-bold text-basque-green">Service en partenariat avec Artzainak</h4>
+              <p class="mt-2 text-gray-700">
+                Cette évaluation est réalisée par notre équipe professionnelle en partenariat avec 
+                <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">Artzainak</a>, 
+                spécialiste en éducation canine pour chiens de troupeau.
+              </p>
             </div>
             
-            <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <div class="mt-8 flex flex-col md:flex-row gap-4">
               <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
                 Contacter le propriétaire
               </button>
@@ -210,6 +204,33 @@
         document.body.style.overflow = '';
       });
     }
+    
+    function scrollToInscriptionChien() {
+      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:first-child');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ajouter une classe pour mettre en évidence
+        element.classList.add('ring-2', 'ring-basque-red', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-basque-red', 'ring-opacity-50');
+        }, 2000);
+      }
+    }
+    
+    function scrollToInscriptionEleveur() {
+      const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:last-child');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ajouter une classe pour mettre en évidence
+        element.classList.add('ring-2', 'ring-basque-green', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-basque-green', 'ring-opacity-50');
+        }, 2000);
+      }
+    }
+
+    // Démarrer l'application après le chargement du DOM
+    document.addEventListener('DOMContentLoaded', init);
     
     function scrollToInscriptionChien() {
       const element = document.querySelector('#profil-content .grid.grid-cols-1.md\\:grid-cols-2 .border:first-child');
@@ -1056,4 +1077,27 @@
       if (chien.evaluation === 'Non évalué') {
         evaluationContent = `
           <div class="flex items-center text-yellow-700">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation gratuite.</p>
+          </div>
+        `;
+      } else if (chien.evaluation === 'En cours') {
+        evaluationContent = `
+          <div class="flex items-center text-blue-700">
+            <div class="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
+            <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
+          </div>
+        `;
+      } else {
+        evaluationContent = `
+          <div class="flex items-center text-green-700">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <p>${chien.evaluation}</p>
+          </div>
+        `;

@@ -4,765 +4,431 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Berger Connect - Chiens de troupeau au Pays Basque</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Import Tailwind CSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Custom styles -->
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  
-  <!-- Import React et ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.min.js"></script>
-  
-  <!-- Babel pour transpiler JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Votre code d'application -->
-  <script type="text/babel">
-    // Définition des composants d'icônes
-    const Search = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-search ${className}`} {...props}>
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-    );
-    
-    const Menu = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-menu ${className}`} {...props}>
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
-    );
-    
-    const X = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-x ${className}`} {...props}>
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
-    );
-    
-    const MessageCircle = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-message-circle ${className}`} {...props}>
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-      </svg>
-    );
-    
-    const Check = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-check ${className}`} {...props}>
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    );
-    
-    const AlertTriangle = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-alert-triangle ${className}`} {...props}>
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-        <line x1="12" y1="9" x2="12" y2="13" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>
-    );
-    
-    const User = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-user ${className}`} {...props}>
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    );
-    
-    const Home = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-home ${className}`} {...props}>
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    );
-    
-    const Heart = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-heart ${className}`} {...props}>
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-    );
-    
-    const Shield = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-shield ${className}`} {...props}>
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    );
-    
-    const Users = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-users ${className}`} {...props}>
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    );
-    
-    const Settings = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-settings ${className}`} {...props}>
-        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    );
-    
-    const LogOut = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-log-out ${className}`} {...props}>
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" />
-        <line x1="21" y1="12" x2="9" y2="12" />
-      </svg>
-    );
-    
-    // Icône personnalisée pour les chiens
-    const DogIcon = ({className = "", size = 24, ...props}) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`custom-icon ${className}`} {...props}>
-        <path d="M4 9l7.5-5 7.5 5v8.5c0 .83-.67 1.5-1.5 1.5h-12c-.83 0-1.5-.67-1.5-1.5V9z" />
-        <path d="M16 3v4" />
-        <circle cx="8" cy="14" r="2" />
-        <circle cx="16" cy="14" r="2" />
-      </svg>
-    );
-    
-    const App = () => {
-      const [activeTab, setActiveTab] = React.useState('accueil');
-      const [menuOpen, setMenuOpen] = React.useState(false);
-      const [filterOpen, setFilterOpen] = React.useState(false);
-      const [selectedDog, setSelectedDog] = React.useState(null);
-      
-      const toggleMenu = () => setMenuOpen(!menuOpen);
-      const toggleFilter = () => setFilterOpen(!filterOpen);
-      
-      // Couleurs basées sur le Pays Basque (rouge et vert)
-      const primaryColor = 'bg-red-700';
-      const secondaryColor = 'bg-green-700';
-      
-      // Données d'exemple
-      const chiens = [
-        { 
-          id: 1, 
-          nom: 'Max', 
-          race: 'Border Collie', 
-          age: '2 ans', 
-          sexe: 'Mâle',
-          localisation: 'Refuge de Bayonne',
-          description: 'Max est un Border Collie énergique avec un fort instinct de troupeau. Il a déjà travaillé avec des moutons et apprend vite.',
-          statut: 'Disponible',
-          evaluation: 'Non évalué',
-          img: '/api/placeholder/400/320'
-        },
-        { 
-          id: 2, 
-          nom: 'Luna', 
-          race: 'Border Collie', 
-          age: '3 ans', 
-          sexe: 'Femelle',
-          localisation: 'Particulier à Saint-Jean-de-Luz',
-          description: 'Luna est une chienne calme et attentive. Son ancien propriétaire l\'utilisait pour le troupeau mais ne peut plus la garder.',
-          statut: 'En évaluation',
-          evaluation: 'En cours',
-          img: '/api/placeholder/400/320'
-        },
-        { 
-          id: 3, 
-          nom: 'Orion', 
-          race: 'Berger des Pyrénées', 
-          age: '1 an', 
-          sexe: 'Mâle',
-          localisation: 'Refuge d\'Anglet',
-          description: 'Jeune berger pyrénéen avec beaucoup d\'énergie. N\'a jamais travaillé avec des troupeaux mais montre des prédispositions.',
-          statut: 'Disponible',
-          evaluation: 'Non évalué',
-          img: '/api/placeholder/400/320'
-        }
-      ];
-      
-      const eleveurs = [
-        {
-          id: 1,
-          nom: 'Ferme Etchegaray',
-          localisation: 'Hasparren',
-          cheptel: 'Moutons',
-          description: 'Exploitation familiale de 150 brebis laitières, recherche un chien de troupeau expérimenté.',
-          contact: 'Jean Etchegaray'
-        },
-        {
-          id: 2,
-          nom: 'GAEC des Montagnes',
-          localisation: 'Tardets-Sorholus',
-          cheptel: 'Moutons et quelques vaches',
-          description: 'Élevage en montagne, besoin d\'un chien endurant et habitué au terrain difficile.',
-          contact: 'Marie Lasalle'
-        }
-      ];
-
-      // Fonction pour rendre les cartes de chiens
-      const renderDogCard = (chien) => (
-        <div 
-          key={chien.id} 
-          className="rounded-xl shadow-lg overflow-hidden bg-white cursor-pointer transform transition hover:scale-105"
-          onClick={() => setSelectedDog(chien)}
-        >
-          <img src={chien.img} alt={chien.nom} className="w-full h-48 object-cover" />
-          <div className="p-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-800">{chien.nom}</h3>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                chien.statut === 'Disponible' ? 'bg-blue-100 text-blue-800' : 
-                chien.statut === 'En évaluation' ? 'bg-yellow-100 text-yellow-800' : 
-                'bg-green-100 text-green-800'
-              }`}>
-                {chien.statut}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">{chien.race}, {chien.age}</p>
-            <p className="text-sm text-gray-600">{chien.localisation}</p>
-            <div className="mt-3 flex items-center">
-              {chien.evaluation === 'Non évalué' ? (
-                <AlertTriangle className="w-4 h-4 text-yellow-500 mr-1" />
-              ) : chien.evaluation === 'En cours' ? (
-                <div className="w-4 h-4 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin mr-1"></div>
-              ) : (
-                <Check className="w-4 h-4 text-green-500 mr-1" />
-              )}
-              <span className="text-xs text-gray-500">{chien.evaluation}</span>
+  <div id="app" class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <button id="menuBtn" class="md:hidden mr-2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-lg bg-red-700 flex items-center justify-center text-white font-bold">BC</div>
+              <span class="ml-2 text-xl font-bold text-gray-800">Berger Connect</span>
             </div>
           </div>
+          
+          <div class="hidden md:flex items-center space-x-6">
+            <button class="font-medium text-red-700" id="accueilBtn">Accueil</button>
+            <button class="font-medium text-gray-600 hover:text-gray-900" id="chiensBtn">Chiens</button>
+            <button class="font-medium text-gray-600 hover:text-gray-900" id="eleveursBtn">Éleveurs</button>
+            <button class="font-medium text-gray-600 hover:text-gray-900" id="profilBtn">Mon Profil</button>
+          </div>
+          
+          <div class="flex items-center gap-4">
+            <div class="relative rounded-full bg-gray-100 px-3 py-2 hidden md:flex items-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" placeholder="Rechercher..." class="ml-2 bg-transparent border-none focus:outline-none text-sm w-32 lg:w-64">
+            </div>
+            
+            <button class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
-      );
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="mainContent">
+      <!-- Contenu principal ici -->
+      <div id="accueil-content">
+        <div class="p-6 rounded-xl bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg">
+          <h2 class="text-2xl font-bold">Bienvenue sur Berger Connect</h2>
+          <p class="mt-2">Votre plateforme de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes.</p>
+          <div class="mt-6 flex gap-4">
+            <button id="voirChiensBtn" class="px-4 py-2 bg-white text-red-700 rounded-lg font-medium hover:bg-gray-100 transition">
+              Voir les chiens disponibles
+            </button>
+            <button id="voirEleveursBtn" class="px-4 py-2 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 transition">
+              Voir les éleveurs
+            </button>
+          </div>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-800 mt-8">Derniers chiens ajoutés</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4" id="chiens-container">
+          <!-- Les chiens seront ajoutés ici par JavaScript -->
+        </div>
+      </div>
+
+      <div id="chiens-content" class="hidden">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold text-gray-800">Chiens disponibles</h2>
+          <button id="filterBtn" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Filtrer
+          </button>
+        </div>
+        
+        <div id="filter-panel" class="hidden mt-4 bg-white rounded-xl shadow-lg p-4">
+          <!-- Contenu du filtre -->
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="all-chiens-container">
+          <!-- Tous les chiens seront ajoutés ici -->
+        </div>
+      </div>
+
+      <div id="eleveurs-content" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800">Éleveurs recherchant un chien</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" id="eleveurs-container">
+          <!-- Les éleveurs seront ajoutés ici -->
+        </div>
+      </div>
+
+      <div id="profil-content" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800">Mon profil</h2>
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-4">
+          <!-- Contenu du profil -->
+        </div>
+      </div>
+    </main>
     
-      // Fonction pour rendre les cartes d'éleveurs
-      const renderEleveurCard = (eleveur) => (
-        <div key={eleveur.id} className="bg-white rounded-xl shadow-lg p-4 transition hover:shadow-xl">
-          <h3 className="font-bold text-gray-800">{eleveur.nom}</h3>
-          <p className="text-sm text-gray-600 mt-1">{eleveur.localisation}</p>
-          <p className="text-sm text-gray-600">Cheptel: {eleveur.cheptel}</p>
-          <p className="text-sm text-gray-700 mt-2">{eleveur.description}</p>
-          <div className="mt-3 flex justify-between items-center">
-            <span className="text-xs text-gray-500">Contact: {eleveur.contact}</span>
-            <button className="flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900">
-              <MessageCircle className="w-4 h-4" />
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-lg bg-red-700 flex items-center justify-center text-white font-bold">BC</div>
+              <span class="ml-2 text-xl font-bold">Berger Connect</span>
+            </div>
+            <p class="mt-4 text-gray-400">
+              Service de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes. 
+              Évaluation professionnelle pour garantir le placement idéal.
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-bold mb-4">Navigation</h3>
+            <ul class="space-y-2">
+              <li><button class="text-gray-400 hover:text-white" id="footerAccueilBtn">Accueil</button></li>
+              <li><button class="text-gray-400 hover:text-white" id="footerChiensBtn">Chiens disponibles</button></li>
+              <li><button class="text-gray-400 hover:text-white" id="footerEleveursBtn">Éleveurs</button></li>
+              <li><button class="text-gray-400 hover:text-white" id="footerProfilBtn">Mon profil</button></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-bold mb-4">Contact</h3>
+            <p class="text-gray-400">
+              Jean Puentes<br>
+              Éducateur canin spécialisé<br>
+              Hasparren, Pays Basque<br>
+              contact@bergerconnect.fr<br>
+              06 XX XX XX XX
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bouton d'aide flottant -->
+    <div class="fixed bottom-6 right-6">
+      <button class="w-14 h-14 rounded-full bg-green-700 text-white shadow-lg flex items-center justify-center hover:bg-green-800 transition">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Données des chiens et éleveurs
+    const chiens = [
+      { 
+        id: 1, 
+        nom: 'Max', 
+        race: 'Border Collie', 
+        age: '2 ans', 
+        sexe: 'Mâle',
+        localisation: 'Refuge de Bayonne',
+        description: 'Max est un Border Collie énergique avec un fort instinct de troupeau. Il a déjà travaillé avec des moutons et apprend vite.',
+        statut: 'Disponible',
+        evaluation: 'Non évalué'
+      },
+      { 
+        id: 2, 
+        nom: 'Luna', 
+        race: 'Border Collie', 
+        age: '3 ans', 
+        sexe: 'Femelle',
+        localisation: 'Particulier à Saint-Jean-de-Luz',
+        description: 'Luna est une chienne calme et attentive. Son ancien propriétaire l\'utilisait pour le troupeau mais ne peut plus la garder.',
+        statut: 'En évaluation',
+        evaluation: 'En cours'
+      },
+      { 
+        id: 3, 
+        nom: 'Orion', 
+        race: 'Berger des Pyrénées', 
+        age: '1 an', 
+        sexe: 'Mâle',
+        localisation: 'Refuge d\'Anglet',
+        description: 'Jeune berger pyrénéen avec beaucoup d\'énergie. N\'a jamais travaillé avec des troupeaux mais montre des prédispositions.',
+        statut: 'Disponible',
+        evaluation: 'Non évalué'
+      }
+    ];
+    
+    const eleveurs = [
+      {
+        id: 1,
+        nom: 'Ferme Etchegaray',
+        localisation: 'Hasparren',
+        cheptel: 'Moutons',
+        description: 'Exploitation familiale de 150 brebis laitières, recherche un chien de troupeau expérimenté.',
+        contact: 'Jean Etchegaray'
+      },
+      {
+        id: 2,
+        nom: 'GAEC des Montagnes',
+        localisation: 'Tardets-Sorholus',
+        cheptel: 'Moutons et quelques vaches',
+        description: 'Élevage en montagne, besoin d\'un chien endurant et habitué au terrain difficile.',
+        contact: 'Marie Lasalle'
+      }
+    ];
+
+    // Fonctions d'initialisation
+    function init() {
+      // Générer les cartes de chiens
+      renderDogCards();
+      renderEleveurCards();
+      
+      // Gestionnaires d'événements pour la navigation
+      document.getElementById('accueilBtn').addEventListener('click', () => showTab('accueil'));
+      document.getElementById('chiensBtn').addEventListener('click', () => showTab('chiens'));
+      document.getElementById('eleveursBtn').addEventListener('click', () => showTab('eleveurs'));
+      document.getElementById('profilBtn').addEventListener('click', () => showTab('profil'));
+      
+      document.getElementById('footerAccueilBtn').addEventListener('click', () => showTab('accueil'));
+      document.getElementById('footerChiensBtn').addEventListener('click', () => showTab('chiens'));
+      document.getElementById('footerEleveursBtn').addEventListener('click', () => showTab('eleveurs'));
+      document.getElementById('footerProfilBtn').addEventListener('click', () => showTab('profil'));
+      
+      document.getElementById('voirChiensBtn').addEventListener('click', () => showTab('chiens'));
+      document.getElementById('voirEleveursBtn').addEventListener('click', () => showTab('eleveurs'));
+      
+      document.getElementById('filterBtn').addEventListener('click', toggleFilter);
+    }
+
+    function showTab(tabName) {
+      // Cacher tous les contenus
+      document.getElementById('accueil-content').classList.add('hidden');
+      document.getElementById('chiens-content').classList.add('hidden');
+      document.getElementById('eleveurs-content').classList.add('hidden');
+      document.getElementById('profil-content').classList.add('hidden');
+      
+      // Afficher le contenu sélectionné
+      document.getElementById(`${tabName}-content`).classList.remove('hidden');
+      
+      // Mettre à jour la navigation
+      document.getElementById('accueilBtn').classList.remove('text-red-700');
+      document.getElementById('chiensBtn').classList.remove('text-red-700');
+      document.getElementById('eleveursBtn').classList.remove('text-red-700');
+      document.getElementById('profilBtn').classList.remove('text-red-700');
+      
+      document.getElementById('accueilBtn').classList.add('text-gray-600');
+      document.getElementById('chiensBtn').classList.add('text-gray-600');
+      document.getElementById('eleveursBtn').classList.add('text-gray-600');
+      document.getElementById('profilBtn').classList.add('text-gray-600');
+      
+      document.getElementById(`${tabName}Btn`).classList.remove('text-gray-600');
+      document.getElementById(`${tabName}Btn`).classList.add('text-red-700');
+    }
+
+    function toggleFilter() {
+      const filterPanel = document.getElementById('filter-panel');
+      if (filterPanel.classList.contains('hidden')) {
+        filterPanel.classList.remove('hidden');
+        filterPanel.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Race</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="">Toutes les races</option>
+                <option value="border">Border Collie</option>
+                <option value="berger">Berger des Pyrénées</option>
+                <option value="aussie">Berger Australien</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Âge</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="">Tous les âges</option>
+                <option value="junior">Moins de 2 ans</option>
+                <option value="adulte">2 à 5 ans</option>
+                <option value="senior">Plus de 5 ans</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="">Tous les statuts</option>
+                <option value="disponible">Disponible</option>
+                <option value="evaluation">En évaluation</option>
+                <option value="evalue">Évalué</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <button class="px-4 py-2 rounded-lg font-medium text-white bg-red-700 hover:bg-red-800 transition">
+              Appliquer les filtres
+            </button>
+          </div>
+        `;
+      } else {
+        filterPanel.classList.add('hidden');
+      }
+    }
+
+    function renderDogCards() {
+      const container = document.getElementById('chiens-container');
+      const allContainer = document.getElementById('all-chiens-container');
+      
+      // Vider les conteneurs
+      container.innerHTML = '';
+      allContainer.innerHTML = '';
+      
+      // Créer les cartes pour les chiens
+      chiens.forEach(chien => {
+        const card = createDogCard(chien);
+        
+        // Ajouter au conteneur principal (3 premiers)
+        if (chien.id <= 3) {
+          container.appendChild(card.cloneNode(true));
+        }
+        
+        // Ajouter au conteneur "tous les chiens"
+        allContainer.appendChild(card);
+      });
+    }
+
+    function createDogCard(chien) {
+      const div = document.createElement('div');
+      div.className = 'rounded-xl shadow-lg overflow-hidden bg-white cursor-pointer transform transition hover:scale-105';
+      div.setAttribute('data-id', chien.id);
+      
+      // Définir différentes couleurs selon le statut
+      let statusColorClass = '';
+      if (chien.statut === 'Disponible') {
+        statusColorClass = 'bg-blue-100 text-blue-800';
+      } else if (chien.statut === 'En évaluation') {
+        statusColorClass = 'bg-yellow-100 text-yellow-800';
+      } else {
+        statusColorClass = 'bg-green-100 text-green-800';
+      }
+      
+      // Icône d'évaluation
+      let evaluationIcon = '';
+      if (chien.evaluation === 'Non évalué') {
+        evaluationIcon = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500 mr-1">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        `;
+      } else if (chien.evaluation === 'En cours') {
+        evaluationIcon = `<div class="w-4 h-4 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin mr-1"></div>`;
+      } else {
+        evaluationIcon = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 mr-1">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+      }
+      
+      div.innerHTML = `
+        <div class="h-48 bg-gray-200 flex items-center justify-center">
+          <span class="text-gray-400">Image</span>
+        </div>
+        <div class="p-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800">${chien.nom}</h3>
+            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColorClass}">
+              ${chien.statut}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 mt-1">${chien.race}, ${chien.age}</p>
+          <p class="text-sm text-gray-600">${chien.localisation}</p>
+          <div class="mt-3 flex items-center">
+            ${evaluationIcon}
+            <span class="text-xs text-gray-500">${chien.evaluation}</span>
+          </div>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    function renderEleveurCards() {
+      const container = document.getElementById('eleveurs-container');
+      container.innerHTML = '';
+      
+      eleveurs.forEach(eleveur => {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-xl shadow-lg p-4 transition hover:shadow-xl';
+        div.innerHTML = `
+          <h3 class="font-bold text-gray-800">${eleveur.nom}</h3>
+          <p class="text-sm text-gray-600 mt-1">${eleveur.localisation}</p>
+          <p class="text-sm text-gray-600">Cheptel: ${eleveur.cheptel}</p>
+          <p class="text-sm text-gray-700 mt-2">${eleveur.description}</p>
+          <div class="mt-3 flex justify-between items-center">
+            <span class="text-xs text-gray-500">Contact: ${eleveur.contact}</span>
+            <button class="flex items-center gap-1 text-sm font-medium text-red-700 hover:text-red-900">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
               Contacter
             </button>
           </div>
-        </div>
-      );
-  
-      // Fonction principale pour afficher le contenu selon l'onglet actif
-      const renderContent = () => {
-        if (selectedDog) {
-          return (
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="relative">
-                <img src={selectedDog.img} alt={selectedDog.nom} className="w-full h-64 object-cover" />
-                <button 
-                  onClick={() => setSelectedDog(null)}
-                  className="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-              
-              <div className="p-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-800">{selectedDog.nom}</h2>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    selectedDog.statut === 'Disponible' ? 'bg-blue-100 text-blue-800' : 
-                    selectedDog.statut === 'En évaluation' ? 'bg-yellow-100 text-yellow-800' : 
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {selectedDog.statut}
-                  </span>
-                </div>
-                
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="text-gray-600">
-                    <span className="text-sm font-medium">Race</span>
-                    <p>{selectedDog.race}</p>
-                  </div>
-                  <div className="text-gray-600">
-                    <span className="text-sm font-medium">Âge</span>
-                    <p>{selectedDog.age}</p>
-                  </div>
-                  <div className="text-gray-600">
-                    <span className="text-sm font-medium">Sexe</span>
-                    <p>{selectedDog.sexe}</p>
-                  </div>
-                  <div className="text-gray-600">
-                    <span className="text-sm font-medium">Localisation</span>
-                    <p>{selectedDog.localisation}</p>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium text-gray-800">Description</h3>
-                  <p className="mt-2 text-gray-600">{selectedDog.description}</p>
-                </div>
-                
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium text-gray-800">Évaluation</h3>
-                  <div className="mt-2 p-4 rounded-lg bg-gray-50">
-                    {selectedDog.evaluation === 'Non évalué' ? (
-                      <div className="flex items-center text-yellow-700">
-                        <AlertTriangle className="w-5 h-5 mr-2" />
-                        <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation.</p>
-                      </div>
-                    ) : selectedDog.evaluation === 'En cours' ? (
-                      <div className="flex items-center text-blue-700">
-                        <div className="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
-                        <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
-                      </div>
-                    ) : (
-                      <div className="flex items-center text-green-700">
-                        <Check className="w-5 h-5 mr-2" />
-                        <p>{selectedDog.evaluation}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="mt-8 flex gap-4">
-                  <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
-                    Contacter le propriétaire
-                  </button>
-                  <button className={`px-4 py-2 rounded-lg font-medium text-white ${secondaryColor} hover:bg-green-800 transition`}>
-                    Demander une évaluation
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        }
+        `;
         
-        switch (activeTab) {
-          case 'accueil':
-            return (
-              <div className="space-y-6">
-                <div className="p-6 rounded-xl bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg">
-                  <h2 className="text-2xl font-bold">Bienvenue sur Berger Connect</h2>
-                  <p className="mt-2">Votre plateforme de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes.</p>
-                  <div className="mt-6 flex gap-4">
-                    <button 
-                      onClick={() => setActiveTab('chiens')}
-                      className="px-4 py-2 bg-white text-red-700 rounded-lg font-medium hover:bg-gray-100 transition"
-                    >
-                      Voir les chiens disponibles
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('eleveurs')}
-                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 transition"
-                    >
-                      Voir les éleveurs
-                    </button>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-800">Derniers chiens ajoutés</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {chiens.slice(0, 3).map(renderDogCard)}
-                </div>
-                
-                <div className="flex justify-center mt-6">
-                  <button 
-                    onClick={() => setActiveTab('chiens')}
-                    className="px-4 py-2 text-red-700 font-medium hover:underline"
-                  >
-                    Voir tous les chiens →
-                  </button>
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-800 mt-8">Notre service d'évaluation</h3>
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <p className="text-gray-600">
-                    En tant qu'éducateur canin spécialisé en chiens de troupeau, je propose un service d'évaluation complet
-                    pour s'assurer que chaque chien est placé dans un environnement adapté à ses capacités.
-                  </p>
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-lg bg-red-50 border border-red-100">
-                      <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
-                        <Shield className="w-6 h-6 text-red-700" />
-                      </div>
-                      <h4 className="font-medium text-gray-800">Évaluation comportementale</h4>
-                      <p className="mt-1 text-sm text-gray-600">Analyse du tempérament et des aptitudes naturelles du chien.</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-green-50 border border-green-100">
-                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
-                        <Users className="w-6 h-6 text-green-700" />
-                      </div>
-                      <h4 className="font-medium text-gray-800">Test avec le troupeau</h4>
-                      <p className="mt-1 text-sm text-gray-600">Mise en situation réelle avec différents types de bétail.</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                        <Heart className="w-6 h-6 text-blue-700" />
-                      </div>
-                      <h4 className="font-medium text-gray-800">Compatibilité</h4>
-                      <p className="mt-1 text-sm text-gray-600">Recommandations personnalisées pour le placement idéal.</p>
-                    </div>
-                  </div>
-                  <button className={`mt-6 px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
-                    En savoir plus sur l'évaluation
-                  </button>
-                </div>
-              </div>
-            );
-          case 'chiens':
-            return (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-800">Chiens disponibles</h2>
-                  <button 
-                    onClick={toggleFilter}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition"
-                  >
-                    <Search className="w-4 h-4" />
-                    Filtrer
-                  </button>
-                </div>
-                
-                {filterOpen && (
-                  <div className="bg-white rounded-xl shadow-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Race</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                          <option value="">Toutes les races</option>
-                          <option value="border">Border Collie</option>
-                          <option value="berger">Berger des Pyrénées</option>
-                          <option value="aussie">Berger Australien</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Âge</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                          <option value="">Tous les âges</option>
-                          <option value="junior">Moins de 2 ans</option>
-                          <option value="adulte">2 à 5 ans</option>
-                          <option value="senior">Plus de 5 ans</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                          <option value="">Tous les statuts</option>
-                          <option value="disponible">Disponible</option>
-                          <option value="evaluation">En évaluation</option>
-                          <option value="evalue">Évalué</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
-                        Appliquer les filtres
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {chiens.map(renderDogCard)}
-                </div>
-              </div>
-            );
-          case 'eleveurs':
-            return (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800">Éleveurs recherchant un chien</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {eleveurs.map(renderEleveurCard)}
-                </div>
-                <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
-                  <h3 className="text-lg font-bold text-gray-800">Vous êtes éleveur ?</h3>
-                  <p className="mt-2 text-gray-600">
-                    Inscrivez-vous gratuitement pour publier votre recherche de chien de troupeau. 
-                    Notre service d'évaluation vous garantit un chien adapté à vos besoins.
-                  </p>
-                  <button className={`mt-4 px-4 py-2 rounded-lg font-medium text-white ${secondaryColor} hover:bg-green-800 transition`}>
-                    Inscription éleveur
-                  </button>
-                </div>
-              </div>
-            );
-          case 'profil':
-            return (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800">Mon profil</h2>
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center">
-                    <div className={`w-16 h-16 rounded-full ${primaryColor} flex items-center justify-center text-white text-xl font-bold`}>
-                      JP
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-bold text-gray-800">Jean Puentes</h3>
-                      <p className="text-gray-600">Éducateur canin spécialisé</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 space-y-4">
-                    <div className="p-4 rounded-lg bg-gray-50">
-                      <h4 className="font-medium text-gray-800">Mes informations</h4>
-                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <span className="text-sm text-gray-500">Email</span>
-                          <p className="text-gray-700">jean.puentes@example.com</p>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-500">Téléphone</span>
-                          <p className="text-gray-700">06 XX XX XX XX</p>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-500">Localisation</span>
-                          <p className="text-gray-700">Hasparren, Pays Basque</p>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-500">Spécialité</span>
-                          <p className="text-gray-700">Chiens de troupeau, Border Collie</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 rounded-lg bg-gray-50">
-                      <h4 className="font-medium text-gray-800">Mes services</h4>
-                      <ul className="mt-2 space-y-2">
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <Check className="w-4 h-4 text-green-500" />
-                          Évaluation comportementale
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <Check className="w-4 h-4 text-green-500" />
-                          Test avec troupeau
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <Check className="w-4 h-4 text-green-500" />
-                          Formation de base
-                        </li>
-                        <li className="flex items-center gap-2 text-gray-700">
-                          <Check className="w-4 h-4 text-green-500" />
-                          Suivi post-placement
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 flex gap-4">
-                    <button className="px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
-                      Modifier mon profil
-                    </button>
-                    <button className={`px-4 py-2 rounded-lg font-medium text-white ${primaryColor} hover:bg-red-800 transition`}>
-                      Gérer mes annonces
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          default:
-            return <div>Page non trouvée</div>;
-        }
-      };
-      
-      return (
-        <div className="min-h-screen bg-gray-50">
-          {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-16">
-                <div className="flex items-center">
-                  <button className="md:hidden mr-2" onClick={toggleMenu}>
-                    <Menu className="w-6 h-6 text-gray-700" />
-                  </button>
-                  <div className="flex items-center">
-                    <div className={`w-10 h-10 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold`}>BC</div>
-                    <span className="ml-2 text-xl font-bold text-gray-800">Berger Connect</span>
-                  </div>
-                </div>
-                
-                <div className="hidden md:flex items-center space-x-6">
-                  <button 
-                    onClick={() => setActiveTab('accueil')} 
-                    className={`font-medium ${activeTab === 'accueil' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
-                  >
-                    Accueil
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('chiens')} 
-                    className={`font-medium ${activeTab === 'chiens' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
-                  >
-                    Chiens
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('eleveurs')} 
-                    className={`font-medium ${activeTab === 'eleveurs' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
-                  >
-                    Éleveurs
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('profil')} 
-                    className={`font-medium ${activeTab === 'profil' ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'}`}
-                  >
-                    Mon Profil
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <div className="relative rounded-full bg-gray-100 px-3 py-2 hidden md:flex items-center">
-                    <Search className="w-5 h-5 text-gray-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Rechercher..." 
-                      className="ml-2 bg-transparent border-none focus:outline-none text-sm w-32 lg:w-64"
-                    />
-                  </div>
-                  
-                  <button className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <User className="w-5 h-5 text-gray-700" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
+        container.appendChild(div);
+      });
+    }
 
-          {/* Mobile Menu */}
-          {menuOpen && (
-            <div className="fixed inset-0 z-50 md:hidden">
-              <div className="fixed inset-0 bg-black opacity-50" onClick={toggleMenu}></div>
-              <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
-                <div className="p-4 border-b">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className={`w-8 h-8 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold text-sm`}>BC</div>
-                      <span className="ml-2 font-bold text-gray-800">Berger Connect</span>
-                    </div>
-                    <button onClick={toggleMenu}>
-                      <X className="w-5 h-5 text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-                <nav className="p-4">
-                  <ul className="space-y-2">
-                    <li>
-                      <button 
-                        onClick={() => {setActiveTab('accueil'); toggleMenu();}} 
-                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'accueil' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                      >
-                        <Home className="w-5 h-5 mr-3" />
-                        Accueil
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => {setActiveTab('chiens'); toggleMenu();}} 
-                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'chiens' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                      >
-                        <DogIcon className="w-5 h-5 mr-3" />
-                        Chiens
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => {setActiveTab('eleveurs'); toggleMenu();}} 
-                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'eleveurs' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                      >
-                        <Users className="w-5 h-5 mr-3" />
-                        Éleveurs
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => {setActiveTab('profil'); toggleMenu();}} 
-                        className={`flex items-center w-full px-3 py-2 rounded-lg ${activeTab === 'profil' ? 'bg-red-50 text-red-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                      >
-                        <User className="w-5 h-5 mr-3" />
-                        Mon Profil
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-            </div>
-          )}
-
-          {/* Contenu principal */}
-          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {renderContent()}
-          </main>
-          
-          {/* Footer */}
-          <footer className="bg-gray-800 text-white mt-12">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <div className="flex items-center">
-                    <div className={`w-10 h-10 rounded-lg ${primaryColor} flex items-center justify-center text-white font-bold`}>BC</div>
-                    <span className="ml-2 text-xl font-bold">Berger Connect</span>
-                  </div>
-                  <p className="mt-4 text-gray-400">
-                    Service de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes. 
-                    Évaluation professionnelle pour garantir le placement idéal.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-bold mb-4">Navigation</h3>
-                  <ul className="space-y-2">
-                    <li><button onClick={() => setActiveTab('accueil')} className="text-gray-400 hover:text-white">Accueil</button></li>
-                    <li><button onClick={() => setActiveTab('chiens')} className="text-gray-400 hover:text-white">Chiens disponibles</button></li>
-                    <li><button onClick={() => setActiveTab('eleveurs')} className="text-gray-400 hover:text-white">Éleveurs</button></li>
-                    <li><button onClick={() => setActiveTab('profil')} className="text-gray-400 hover:text-white">Mon profil</button></li>
-                  </ul>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-bold mb-4">Contact</h3>
-                  <p className="text-gray-400">
-                    Jean Puentes<br />
-                    Éducateur canin spécialisé<br />
-                    Hasparren, Pays Basque<br />
-                    contact@bergerconnect.fr<br />
-                    06 XX XX XX XX
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mt-8 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
-                <p className="text-gray-400">© 2025 Berger Connect. Tous droits réservés.</p>
-                <div className="mt-4 md:mt-0 flex space-x-4">
-                  <a href="#" className="text-gray-400 hover:text-white">Mentions légales</a>
-                  <a href="#" className="text-gray-400 hover:text-white">Politique de confidentialité</a>
-                  <a href="#" className="text-gray-400 hover:text-white">CGU</a>
-                </div>
-              </div>
-            </div>
-          </footer>
-          
-          {/* Bouton d'aide flottant */}
-          <div className="fixed bottom-6 right-6">
-            <button className={`w-14 h-14 rounded-full ${secondaryColor} text-white shadow-lg flex items-center justify-center hover:bg-green-800 transition`}>
-              <MessageCircle className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      );
-    };
-
-    // Rendu de l'application
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    );
+    // Démarrer l'application après le chargement du DOM
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>

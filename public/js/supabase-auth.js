@@ -1,131 +1,216 @@
 // Gestion de l'authentification avec Supabase
 
-// Références aux éléments du formulaire de connexion
-const loginForm = document.querySelector('#profil-content form:first-of-type');
-const loginEmail = loginForm.querySelector('input[type="email"]');
-const loginPassword = loginForm.querySelector('input[type="password"]');
-const loginButton = loginForm.querySelector('button');
-
-// Références aux éléments du formulaire d'inscription
-const signupForm = document.querySelector('#profil-content form:nth-of-type(2)');
-const signupName = signupForm.querySelector('input[type="text"]');
-const signupEmail = signupForm.querySelector('input[type="email"]');
-const signupPassword = signupForm.querySelector('input[type="password"]');
-const signupType = signupForm.querySelector('select');
-const signupButton = signupForm.querySelector('button');
-
-// Connexion d'un utilisateur
-loginButton.addEventListener('click', async (e) => {
-  e.preventDefault();
+// Attendre que le DOM soit chargé avant d'initialiser
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("Initialisation de l'authentification");
   
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-  
-  if (email && password) {
-    // Montrer un indicateur de chargement
-    loginButton.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-    loginButton.disabled = true;
-    
-    try {
-      // Tentative de connexion
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-      
-      if (error) throw error;
-      
-      console.log('Utilisateur connecté:', data.user.email);
-      showMessage('Connexion réussie !', 'success');
-      
-      // Réinitialiser le formulaire
-      loginForm.reset();
-      loginButton.textContent = 'Se connecter';
-      loginButton.disabled = false;
-      
-      // Mettre à jour l'interface utilisateur
-      updateUIForLoggedInUser(data.user);
-    } catch (error) {
-      console.error('Erreur de connexion:', error.message);
-      showMessage('Échec de la connexion : ' + error.message, 'error');
-      loginButton.textContent = 'Se connecter';
-      loginButton.disabled = false;
-    }
-  } else {
-    showMessage('Veuillez remplir tous les champs.', 'warning');
+  // Vérifier que supabase est disponible
+  if (typeof supabase === 'undefined') {
+    console.error("Erreur: L'objet supabase n'est pas défini. Vérifiez l'ordre de chargement des scripts.");
+    return;
   }
-});
+  
+  // Références aux éléments du formulaire de connexion
+  const loginForm = document.querySelector('#profil-content form:first-of-type');
+  if (!loginForm) {
+    console.error("Le formulaire de connexion n'a pas été trouvé");
+    return;
+  }
+  
+  const loginEmail = loginForm.querySelector('input[type="email"]');
+  const loginPassword = loginForm.querySelector('input[type="password"]');
+  const loginButton = loginForm.querySelector('button');
 
-// Inscription d'un nouvel utilisateur
-signupButton.addEventListener('click', async (e) => {
-  e.preventDefault();
+  // Références aux éléments du formulaire d'inscription
+  const signupForm = document.querySelector('#profil-content form:nth-of-type(2)');
+  if (!signupForm) {
+    console.error("Le formulaire d'inscription n'a pas été trouvé");
+    return;
+  }
   
-  const name = signupName.value;
-  const email = signupEmail.value;
-  const password = signupPassword.value;
-  const type = signupType.value;
-  
-  if (name && email && password && type) {
-    // Montrer un indicateur de chargement
-    signupButton.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-    signupButton.disabled = true;
+  const signupName = signupForm.querySelector('input[type="text"]');
+  const signupEmail = signupForm.querySelector('input[type="email"]');
+  const signupPassword = signupForm.querySelector('input[type="password"]');
+  const signupType = signupForm.querySelector('select');
+  const signupButton = signupForm.querySelector('button');
+
+  // Connexion d'un utilisateur
+  loginButton.addEventListener('click', async (e) => {
+    e.preventDefault();
     
-    try {
-      // Création du compte
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            name: name,
-            type: type
-          }
-        }
-      });
+    const email = loginEmail.value;
+    const password = loginPassword.value;
+    
+    if (email && password) {
+      // Montrer un indicateur de chargement
+      loginButton.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      loginButton.disabled = true;
       
-      if (error) throw error;
-      
-      console.log('Compte créé pour:', data.user.email);
-      
-      // Insérer les données de profil
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            name: name,
-            type: type
-          }
-        ]);
-      
-      if (profileError) {
-        console.error('Erreur lors de la création du profil:', profileError.message);
-        // Continuer malgré l'erreur car le compte est créé
+      try {
+        // Tentative de connexion
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        
+        if (error) throw error;
+        
+        console.log('Utilisateur connecté:', data.user.email);
+        showMessage('Connexion réussie !', 'success');
+        
+        // Réinitialiser le formulaire
+        loginForm.reset();
+        loginButton.textContent = 'Se connecter';
+        loginButton.disabled = false;
+        
+        // Mettre à jour l'interface utilisateur
+        updateUIForLoggedInUser(data.user);
+      } catch (error) {
+        console.error('Erreur de connexion:', error.message);
+        showMessage('Échec de la connexion : ' + error.message, 'error');
+        loginButton.textContent = 'Se connecter';
+        loginButton.disabled = false;
       }
-      
-      showMessage('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.', 'success');
-      
-      // Réinitialiser le formulaire
-      signupForm.reset();
-      signupButton.textContent = 'Créer un compte';
-      signupButton.disabled = false;
-      
-      // Rediriger vers la page d'accueil
-      showTab('accueil');
-    } catch (error) {
-      console.error('Erreur d\'inscription:', error.message);
-      showMessage('Échec de l\'inscription : ' + error.message, 'error');
-      signupButton.textContent = 'Créer un compte';
-      signupButton.disabled = false;
+    } else {
+      showMessage('Veuillez remplir tous les champs.', 'warning');
     }
-  } else {
-    showMessage('Veuillez remplir tous les champs.', 'warning');
+  });
+
+  // Inscription d'un nouvel utilisateur
+  signupButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    const name = signupName.value;
+    const email = signupEmail.value;
+    const password = signupPassword.value;
+    const type = signupType.value;
+    
+    if (name && email && password && type) {
+      // Montrer un indicateur de chargement
+      signupButton.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      signupButton.disabled = true;
+      
+      try {
+        // Création du compte
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: name,
+              type: type
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        console.log('Compte créé pour:', data.user.email);
+        
+        // Insérer les données de profil
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: data.user.id,
+              name: name,
+              type: type
+            }
+          ]);
+        
+        if (profileError) {
+          console.error('Erreur lors de la création du profil:', profileError.message);
+          // Continuer malgré l'erreur car le compte est créé
+        }
+        
+        showMessage('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.', 'success');
+        
+        // Réinitialiser le formulaire
+        signupForm.reset();
+        signupButton.textContent = 'Créer un compte';
+        signupButton.disabled = false;
+        
+        // Rediriger vers la page d'accueil
+        showTab('accueil');
+      } catch (error) {
+        console.error('Erreur d\'inscription:', error.message);
+        showMessage('Échec de l\'inscription : ' + error.message, 'error');
+        signupButton.textContent = 'Créer un compte';
+        signupButton.disabled = false;
+      }
+    } else {
+      showMessage('Veuillez remplir tous les champs.', 'warning');
+    }
+  });
+
+  // Vérifier l'état de l'authentification au chargement
+  try {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        // Utilisateur connecté
+        updateUIForLoggedInUser(user);
+      }
+    }).catch(error => {
+      console.error('Erreur lors de la vérification de l\'authentification:', error);
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'initialisation de la vérification d\'authentification:', error);
+  }
+
+  // Écouter les changements d'authentification
+  try {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        updateUIForLoggedInUser(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        const userProfile = document.querySelector('#profil-content .userProfile');
+        if (userProfile) {
+          userProfile.remove();
+        }
+        document.querySelector('#profil-content .bg-white.hidden')?.classList.remove('hidden');
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'initialisation du listener d\'authentification:', error);
   }
 });
+
+// Fonction pour afficher des messages d'alerte si elle n'existe pas déjà
+if (typeof showMessage !== 'function') {
+  window.showMessage = function(message, type) {
+    // Créer l'élément de message
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' :
+      type === 'error' ? 'bg-red-500 text-white' :
+      type === 'info' ? 'bg-blue-500 text-white' :
+      'bg-yellow-500 text-white'
+    }`;
+    messageDiv.textContent = message;
+    
+    // Ajouter à la page
+    document.body.appendChild(messageDiv);
+    
+    // Supprimer après 3 secondes
+    setTimeout(() => {
+      messageDiv.classList.add('opacity-0', 'transition-opacity');
+      setTimeout(() => {
+        document.body.removeChild(messageDiv);
+      }, 300);
+    }, 3000);
+  };
+}
 
 // Mise à jour de l'interface pour un utilisateur connecté
 async function updateUIForLoggedInUser(user) {
   try {
+    // Vérifier si le contenu du profil existe
+    const profilContent = document.getElementById('profil-content');
+    if (!profilContent) {
+      console.error("L'élément profil-content n'a pas été trouvé");
+      return;
+    }
+
     // Récupérer les données du profil
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -145,7 +230,10 @@ async function updateUIForLoggedInUser(user) {
     };
     
     // Masquer les formulaires de connexion/inscription
-    document.querySelector('#profil-content .bg-white').classList.add('hidden');
+    const authContainer = document.querySelector('#profil-content .bg-white');
+    if (authContainer) {
+      authContainer.classList.add('hidden');
+    }
     
     // Supprimer l'ancienne interface utilisateur si elle existe
     const oldUserProfile = document.querySelector('#profil-content .userProfile');
@@ -236,59 +324,44 @@ async function updateUIForLoggedInUser(user) {
     `;
     
     // Ajouter à la page
-    document.getElementById('profil-content').appendChild(userProfileDiv);
+    profilContent.appendChild(userProfileDiv);
     
     // Ajouter le gestionnaire de déconnexion
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        
-        // Supprimer l'interface utilisateur
-        userProfileDiv.remove();
-        document.querySelector('#profil-content .bg-white.hidden').classList.remove('hidden');
-        
-        showMessage('Vous êtes déconnecté.', 'success');
-      } catch (error) {
-        console.error('Erreur de déconnexion:', error);
-        showMessage('Erreur lors de la déconnexion.', 'error');
-      }
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+          
+          // Supprimer l'interface utilisateur
+          userProfileDiv.remove();
+          const hiddenContainer = document.querySelector('#profil-content .bg-white.hidden');
+          if (hiddenContainer) {
+            hiddenContainer.classList.remove('hidden');
+          }
+          
+          showMessage('Vous êtes déconnecté.', 'success');
+        } catch (error) {
+          console.error('Erreur de déconnexion:', error);
+          showMessage('Erreur lors de la déconnexion.', 'error');
+        }
+      });
+    }
     
     // Ajouter le gestionnaire pour ajouter un chien
     const addDogBtn = document.getElementById('addDogBtn');
     if (addDogBtn) {
       addDogBtn.addEventListener('click', () => {
-        createDogForm();
+        if (typeof createDogForm === 'function') {
+          createDogForm();
+        } else {
+          console.error("La fonction createDogForm n'est pas définie");
+          showMessage("La fonctionnalité d'ajout de chien n'est pas disponible actuellement.", "error");
+        }
       });
     }
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'interface:', error);
   }
 }
-
-// Vérifier l'état de l'authentification à chaque chargement
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      // Utilisateur connecté
-      updateUIForLoggedInUser(user);
-    }
-  } catch (error) {
-    console.error('Erreur lors de la vérification de l\'authentification:', error);
-  }
-});
-
-// Écouter les changements d'authentification
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    updateUIForLoggedInUser(session.user);
-  } else if (event === 'SIGNED_OUT') {
-    const userProfile = document.querySelector('#profil-content .userProfile');
-    if (userProfile) {
-      userProfile.remove();
-    }
-    document.querySelector('#profil-content .bg-white.hidden')?.classList.remove('hidden');
-  }
-});

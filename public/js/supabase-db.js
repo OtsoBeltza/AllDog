@@ -2,6 +2,12 @@
 
 // Récupération et affichage des chiens
 async function fetchAndDisplayDogs() {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    return;
+  }
+  
   try {
     // Récupérer les chiens depuis Supabase
     const { data: chiens, error } = await supabase
@@ -14,6 +20,11 @@ async function fetchAndDisplayDogs() {
     // Vider les conteneurs
     const container = document.getElementById('chiens-container');
     const allContainer = document.getElementById('all-chiens-container');
+    
+    if (!container || !allContainer) {
+      console.error("Les conteneurs de chiens n'ont pas été trouvés");
+      return;
+    }
     
     container.innerHTML = '';
     allContainer.innerHTML = '';
@@ -53,7 +64,8 @@ async function fetchAndDisplayDogs() {
         btn.addEventListener('click', () => {
           showTab('profil');
           // Vérifier si l'utilisateur est connecté
-          if (supabase.auth.getUser()) {
+          const supabase = window.supabaseClient;
+          if (supabase && supabase.auth.getUser()) {
             scrollToInscriptionChien();
           }
         });
@@ -66,6 +78,12 @@ async function fetchAndDisplayDogs() {
 
 // Récupération et affichage des éleveurs
 async function fetchAndDisplayEleveurs() {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    return;
+  }
+  
   try {
     // Récupérer les éleveurs depuis Supabase
     const { data: eleveurs, error } = await supabase
@@ -76,6 +94,11 @@ async function fetchAndDisplayEleveurs() {
     if (error) throw error;
     
     const container = document.getElementById('eleveurs-container');
+    if (!container) {
+      console.error("Le conteneur des éleveurs n'a pas été trouvé");
+      return;
+    }
+    
     container.innerHTML = '';
     
     let count = 0;
@@ -106,15 +129,19 @@ async function fetchAndDisplayEleveurs() {
         // Ajouter le gestionnaire d'événement pour le bouton de contact
         div.querySelector('.contact-eleveur-btn').addEventListener('click', () => {
           // Vérifier si l'utilisateur est connecté
-          const user = supabase.auth.getUser();
-          if (user) {
-            // Afficher un formulaire de contact
-            showContactForm(eleveur);
-          } else {
-            // Rediriger vers la page de profil pour se connecter
-            showTab('profil');
-            showMessage('Veuillez vous connecter pour contacter l\'éleveur.', 'warning');
-          }
+          const supabase = window.supabaseClient;
+          if (!supabase) return;
+          
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+              // Afficher un formulaire de contact
+              showContactForm(eleveur);
+            } else {
+              // Rediriger vers la page de profil pour se connecter
+              showTab('profil');
+              showMessage('Veuillez vous connecter pour contacter l\'éleveur.', 'warning');
+            }
+          });
         });
       });
     } else {
@@ -131,14 +158,21 @@ async function fetchAndDisplayEleveurs() {
       container.appendChild(message);
       
       // Ajouter le gestionnaire d'événement
-      document.getElementById('addEleveurBtn').addEventListener('click', () => {
-        showTab('profil');
-        // Vérifier si l'utilisateur est connecté
-        const user = supabase.auth.getUser();
-        if (user) {
-          scrollToInscriptionEleveur();
-        }
-      });
+      const addEleveurBtn = document.getElementById('addEleveurBtn');
+      if (addEleveurBtn) {
+        addEleveurBtn.addEventListener('click', () => {
+          showTab('profil');
+          // Vérifier si l'utilisateur est connecté
+          const supabase = window.supabaseClient;
+          if (!supabase) return;
+          
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+              scrollToInscriptionEleveur();
+            }
+          });
+        });
+      }
     }
   } catch (error) {
     console.error("Erreur lors de la récupération des éleveurs: ", error);
@@ -147,6 +181,12 @@ async function fetchAndDisplayEleveurs() {
 
 // Initialisation et appel des fonctions au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
+  // Vérifier si Supabase est initialisé
+  if (!window.supabaseClient) {
+    console.error("Supabase n'est pas initialisé lors du chargement du DOM");
+    return;
+  }
+  
   // Ajouter des données initiales si la base est vide
   initializeDatabase();
   
@@ -157,6 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialisation de la base de données avec des données de démo si nécessaire
 async function initializeDatabase() {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    return;
+  }
+  
   try {
     // Vérifier si la table "chiens" a des données
     const { data: chiens, error: chiensError } = await supabase
@@ -319,6 +365,9 @@ function showContactForm(eleveur) {
       sendBtn.disabled = true;
       
       try {
+        const supabase = window.supabaseClient;
+        if (!supabase) throw new Error("Supabase n'est pas initialisé");
+        
         // Obtenir l'utilisateur actuel
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) throw userError;
@@ -355,7 +404,7 @@ function showContactForm(eleveur) {
   });
 }
 
-// Fonction pour créer une carte de chien (à adapter en fonction de votre design)
+// Fonction pour créer une carte de chien
 function createDogCard(chien) {
   const div = document.createElement('div');
   div.className = 'rounded-xl shadow-lg overflow-hidden bg-white cursor-pointer transform transition hover:scale-105';
@@ -552,6 +601,12 @@ function showDogDetails(chien) {
   // Gestionnaires pour les boutons d'action
   document.getElementById('contactProprietaireBtn')?.addEventListener('click', async () => {
     // Vérifier si l'utilisateur est connecté
+    const supabase = window.supabaseClient;
+    if (!supabase) {
+      showMessage("Erreur de connexion au service", "error");
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       showTab('profil');
@@ -573,26 +628,28 @@ function showDogDetails(chien) {
   });
 }
 
-// Fonction pour afficher des messages
-function showMessage(message, type) {
-  // Créer l'élément de message
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
-    type === 'success' ? 'bg-green-500 text-white' :
-    type === 'error' ? 'bg-red-500 text-white' :
-    type === 'info' ? 'bg-blue-500 text-white' :
-    'bg-yellow-500 text-white'
-  }`;
-  messageDiv.textContent = message;
-  
-  // Ajouter à la page
-  document.body.appendChild(messageDiv);
-  
-  // Supprimer après 3 secondes
-  setTimeout(() => {
-    messageDiv.classList.add('opacity-0', 'transition-opacity');
+// Fonction pour afficher des messages si elle n'existe pas déjà
+if (typeof showMessage !== 'function') {
+  window.showMessage = function(message, type) {
+    // Créer l'élément de message
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' :
+      type === 'error' ? 'bg-red-500 text-white' :
+      type === 'info' ? 'bg-blue-500 text-white' :
+      'bg-yellow-500 text-white'
+    }`;
+    messageDiv.textContent = message;
+    
+    // Ajouter à la page
+    document.body.appendChild(messageDiv);
+    
+    // Supprimer après 3 secondes
     setTimeout(() => {
-      document.body.removeChild(messageDiv);
-    }, 300);
-  }, 3000);
+      messageDiv.classList.add('opacity-0', 'transition-opacity');
+      setTimeout(() => {
+        document.body.removeChild(messageDiv);
+      }, 300);
+    }, 3000);
+  };
 }

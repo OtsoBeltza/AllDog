@@ -4,9 +4,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log("Initialisation de l'authentification");
   
+  // Utiliser l'instance globale de Supabase
+  const supabase = window.supabaseClient;
+  
   // Vérifier que supabase est disponible
-  if (typeof supabase === 'undefined') {
-    console.error("Erreur: L'objet supabase n'est pas défini. Vérifiez l'ordre de chargement des scripts.");
+  if (!supabase) {
+    console.error("Erreur: L'objet supabaseClient n'est pas défini. Vérifiez l'ordre de chargement des scripts.");
     return;
   }
   
@@ -204,6 +207,12 @@ if (typeof showMessage !== 'function') {
 // Mise à jour de l'interface pour un utilisateur connecté
 async function updateUIForLoggedInUser(user) {
   try {
+    const supabase = window.supabaseClient;
+    if (!supabase) {
+      console.error("Supabase n'est pas initialisé");
+      return;
+    }
+    
     // Vérifier si le contenu du profil existe
     const profilContent = document.getElementById('profil-content');
     if (!profilContent) {

@@ -187,15 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
   
-  // Ajouter des données initiales si la base est vide
-  initializeDatabase();
-  
   // Charger les données
   fetchAndDisplayDogs();
   fetchAndDisplayEleveurs();
 });
 
 // Initialisation de la base de données avec des données de démo si nécessaire
+// MODIFIÉ pour éviter les erreurs RLS
 async function initializeDatabase() {
   const supabase = window.supabaseClient;
   if (!supabase) {
@@ -204,97 +202,35 @@ async function initializeDatabase() {
   }
   
   try {
-    // Vérifier si la table "chiens" a des données
+    // Vérifier si l'utilisateur est authentifié
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log("Utilisateur non authentifié, initialisation de la base de données ignorée");
+      return; // Ne pas initialiser les données si l'utilisateur n'est pas connecté
+    }
+    
+    console.log("Vérification des données existantes...");
+    
+    // Vérifie si les tables ont des données mais ne tente pas d'en ajouter
+    // Pour éviter les erreurs RLS
     const { data: chiens, error: chiensError } = await supabase
       .from('chiens')
       .select('id')
       .limit(1);
       
-    if (chiensError) throw chiensError;
-    
-    if (!chiens || chiens.length === 0) {
-      // Ajouter des chiens de démo
-      const chiensDemo = [
-        { 
-          nom: 'Max', 
-          race: 'Border Collie', 
-          age: '2 ans', 
-          sexe: 'Mâle',
-          localisation: 'Refuge de Bayonne',
-          description: 'Max est un Border Collie énergique avec un fort instinct de troupeau. Il a déjà travaillé avec des moutons et apprend vite.',
-          statut: 'Disponible',
-          evaluation: 'Non évalué'
-        },
-        { 
-          nom: 'Luna', 
-          race: 'Border Collie', 
-          age: '3 ans', 
-          sexe: 'Femelle',
-          localisation: 'Particulier à Saint-Jean-de-Luz',
-          description: 'Luna est une chienne calme et attentive. Son ancien propriétaire l\'utilisait pour le troupeau mais ne peut plus la garder.',
-          statut: 'En évaluation',
-          evaluation: 'En cours'
-        },
-        { 
-          nom: 'Orion', 
-          race: 'Berger des Pyrénées', 
-          age: '1 an', 
-          sexe: 'Mâle',
-          localisation: 'Refuge d\'Anglet',
-          description: 'Jeune berger pyrénéen avec beaucoup d\'énergie. N\'a jamais travaillé avec des troupeaux mais montre des prédispositions.',
-          statut: 'Disponible',
-          evaluation: 'Non évalué'
-        }
-      ];
-      
-      // Ajouter chaque chien
-      for (const chien of chiensDemo) {
-        const { error } = await supabase
-          .from('chiens')
-          .insert([chien]);
-          
-        if (error) console.error("Erreur lors de l'ajout du chien: ", error);
-      }
-    }
-    
-    // Vérifier si la table "eleveurs" a des données
     const { data: eleveurs, error: eleveursError } = await supabase
       .from('eleveurs')
       .select('id')
       .limit(1);
-      
-    if (eleveursError) throw eleveursError;
     
-    if (!eleveurs || eleveurs.length === 0) {
-      // Ajouter des éleveurs de démo
-      const eleveursDemo = [
-        {
-          nom: 'Ferme Etchegaray',
-          localisation: 'Hasparren',
-          cheptel: 'Moutons',
-          description: 'Exploitation familiale de 150 brebis laitières, recherche un chien de troupeau expérimenté.',
-          contact: 'Jean Etchegaray'
-        },
-        {
-          nom: 'GAEC des Montagnes',
-          localisation: 'Tardets-Sorholus',
-          cheptel: 'Moutons et quelques vaches',
-          description: 'Élevage en montagne, besoin d\'un chien endurant et habitué au terrain difficile.',
-          contact: 'Marie Lasalle'
-        }
-      ];
-      
-      // Ajouter chaque éleveur
-      for (const eleveur of eleveursDemo) {
-        const { error } = await supabase
-          .from('eleveurs')
-          .insert([eleveur]);
-          
-        if (error) console.error("Erreur lors de l'ajout de l'éleveur: ", error);
-      }
-    }
+    if (chiensError) console.error("Erreur lors de la vérification des chiens:", chiensError);
+    if (eleveursError) console.error("Erreur lors de la vérification des éleveurs:", eleveursError);
+    
+    // Nous ne tentons plus d'insérer des données d'exemple automatiquement
+    console.log("Vérification terminée - Chiens existants:", chiens?.length || 0);
+    console.log("Vérification terminée - Éleveurs existants:", eleveurs?.length || 0);
   } catch (error) {
-    console.error("Erreur lors de l'initialisation de la base de données: ", error);
+    console.error("Erreur lors de la vérification de la base de données:", error);
   }
 }
 

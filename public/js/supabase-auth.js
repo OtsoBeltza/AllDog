@@ -273,7 +273,7 @@ async function updateUIForLoggedInUser(user) {
         <h3 class="text-xl font-bold text-gray-800 mb-4">Mes actions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           ${userData.type === 'eleveur' ? `
-          <button class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
+          <button id="eleveurDescriptionBtn" class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
             <div class="w-10 h-10 rounded-full bg-basque-green flex items-center justify-center text-white">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -302,7 +302,7 @@ async function updateUIForLoggedInUser(user) {
           </button>
           ` : ''}
           
-          <button class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
+          <button id="settingsBtn" class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
             <div class="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center text-white">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
@@ -370,7 +370,311 @@ async function updateUIForLoggedInUser(user) {
         }
       });
     }
+    
+    // NOUVEAU: Ajouter le gestionnaire pour "Décrire mon élevage"
+    const eleveurDescriptionBtn = document.getElementById('eleveurDescriptionBtn');
+    if (eleveurDescriptionBtn) {
+      eleveurDescriptionBtn.addEventListener('click', () => {
+        createEleveurForm();
+      });
+    }
+    
+    // NOUVEAU: Ajouter le gestionnaire pour "Paramètres du compte"
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        showUserSettings(user, userData);
+      });
+    }
+    
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'interface:', error);
   }
+}
+
+// NOUVEAU: Fonction pour afficher les paramètres utilisateur
+function showUserSettings(user, userData) {
+  // Vérifier si l'utilisateur est connecté
+  if (!user) {
+    showMessage('Veuillez vous connecter pour accéder à vos paramètres.', 'warning');
+    return;
+  }
+  
+  const content = document.createElement('div');
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+  
+  content.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="settingsOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6 z-10">
+      <button id="closeSettingsBtn" class="absolute top-4 right-4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-bold text-gray-800">Paramètres du compte</h3>
+      
+      <form id="userSettingsForm" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nom</label>
+          <input type="text" id="userName" value="${userData.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="userEmail" value="${user.email}" readonly class="mt-1 w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+          <p class="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié</p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Type de compte</label>
+          <select id="userType" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+            <option value="eleveur" ${userData.type === 'eleveur' ? 'selected' : ''}>Éleveur/Berger</option>
+            <option value="proprietaire" ${userData.type === 'proprietaire' ? 'selected' : ''}>Propriétaire de chien</option>
+            <option value="refuge" ${userData.type === 'refuge' ? 'selected' : ''}>Représentant de refuge</option>
+          </select>
+        </div>
+        
+        <div class="pt-4 border-t border-gray-200">
+          <h4 class="font-medium text-gray-800">Sécurité</h4>
+          
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+            <input type="password" id="newPassword" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+          </div>
+          
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700">Confirmer le nouveau mot de passe</label>
+            <input type="password" id="confirmPassword" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+          </div>
+        </div>
+        
+        <button type="submit" id="saveSettingsBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+          Enregistrer les modifications
+        </button>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaires d'événements
+  document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('settingsOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Soumission du formulaire
+  document.getElementById('userSettingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('userName').value;
+    const type = document.getElementById('userType').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!name) {
+      showMessage('Le nom est obligatoire.', 'warning');
+      return;
+    }
+    
+    if (newPassword && newPassword !== confirmPassword) {
+      showMessage('Les mots de passe ne correspondent pas.', 'warning');
+      return;
+    }
+    
+    // Changer le bouton en indicateur de chargement
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    saveBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+    saveBtn.disabled = true;
+    
+    try {
+      const supabase = window.supabaseClient;
+      if (!supabase) throw new Error("Supabase n'est pas initialisé");
+      
+      // Mettre à jour le profil
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ name, type })
+        .eq('id', user.id);
+      
+      if (profileError) throw profileError;
+      
+      // Si un nouveau mot de passe est fourni, le mettre à jour
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        
+        if (passwordError) throw passwordError;
+      }
+      
+      showMessage('Vos paramètres ont été mis à jour avec succès.', 'success');
+      
+      // Fermer la modale
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      // Mettre à jour l'interface utilisateur
+      window.location.reload(); // Option simple: recharger la page
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des paramètres:', error);
+      saveBtn.textContent = 'Enregistrer les modifications';
+      saveBtn.disabled = false;
+      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+    }
+  });
+}
+
+// NOUVEAU: Fonction pour créer le formulaire d'élevage
+function createEleveurForm() {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    showMessage("Erreur de connexion au service", "error");
+    return;
+  }
+  
+  // Code du formulaire d'élevage
+  const content = document.createElement('div');
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+  
+  content.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="eleveurFormOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full p-6 z-10 max-h-90vh overflow-auto">
+      <button id="closeEleveurFormBtn" class="absolute top-4 right-4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-bold text-gray-800">Décrire mon élevage</h3>
+      <p class="mt-2 text-gray-700">Complétez les informations sur votre élevage et vos besoins en chien de troupeau.</p>
+      
+      <form id="eleveurForm" class="mt-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Nom de l'élevage / exploitation</label>
+            <input type="text" id="eleveurName" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Localisation</label>
+            <input type="text" id="eleveurLocation" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Ex: Hasparren" required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Type de cheptel</label>
+            <select id="eleveurCheptel" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+              <option value="">Sélectionnez</option>
+              <option value="Moutons">Moutons</option>
+              <option value="Vaches">Vaches</option>
+              <option value="Moutons et vaches">Moutons et vaches</option>
+              <option value="Chèvres">Chèvres</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Description de l'élevage et besoins</label>
+            <textarea id="eleveurDescription" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Décrivez votre élevage, le nombre d'animaux, le terrain, et vos besoins spécifiques en chien de troupeau..." required></textarea>
+          </div>
+          
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Nom du contact</label>
+            <input type="text" id="eleveurContact" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+          </div>
+        </div>
+        
+        <button type="submit" id="submitEleveurBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+          Enregistrer mon élevage
+        </button>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaire d'événements pour fermer le formulaire
+  document.getElementById('closeEleveurFormBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('eleveurFormOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Soumission du formulaire
+  document.getElementById('eleveurForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nom = document.getElementById('eleveurName').value;
+    const localisation = document.getElementById('eleveurLocation').value;
+    const cheptel = document.getElementById('eleveurCheptel').value;
+    const description = document.getElementById('eleveurDescription').value;
+    const contact = document.getElementById('eleveurContact').value;
+    
+    if (!nom || !localisation || !cheptel || !description || !contact) {
+      showMessage('Veuillez remplir tous les champs obligatoires.', 'warning');
+      return;
+    }
+    
+    // Changer le bouton en indicateur de chargement
+    const submitBtn = document.getElementById('submitEleveurBtn');
+    submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+    submitBtn.disabled = true;
+    
+    try {
+      const supabase = window.supabaseClient;
+      if (!supabase) throw new Error("Supabase n'est pas initialisé");
+      
+      // Obtenir l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Préparer les données de l'éleveur
+      const eleveurData = {
+        nom,
+        localisation,
+        cheptel,
+        description,
+        contact,
+        user_id: user.id
+      };
+      
+      // Ajouter l'éleveur à la base de données
+      const { data, error } = await supabase
+        .from('eleveurs')
+        .insert([eleveurData]);
+      
+      if (error) throw error;
+      
+      // Fermer le formulaire et afficher un message de succès
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      showMessage('Votre élevage a été enregistré avec succès.', 'success');
+      
+      // Rafraîchir l'affichage des éleveurs si la fonction existe
+      if (typeof fetchAndDisplayEleveurs === 'function') {
+        fetchAndDisplayEleveurs();
+      }
+      
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'élevage:", error);
+      submitBtn.textContent = 'Enregistrer mon élevage';
+      submitBtn.disabled = false;
+      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+    }
+  });
 }

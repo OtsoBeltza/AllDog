@@ -1049,14 +1049,18 @@
     // Démarrer l'application après le chargement du DOM
     document.addEventListener('DOMContentLoaded', init);
   </script>
-  <!-- scripts  Supabase -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
+<!-- scripts Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // Configuration Supabase
   const supabaseUrl = 'https://stspcjmphbzpeaprooyw.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0c3Bjam1waGJ6cGVhcHJvb3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MzkzMTIsImV4cCI6MjA2MDIxNTMxMn0.G9CxewImR5Pmq5epH7gw_d_j3VFLbY3ZbCTheS9LtE4';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  
+  // Utiliser la bonne méthode pour créer le client Supabase
+  const supabase = supabase ? supabase.createClient(supabaseUrl, supabaseKey) : window.supabase.createClient(supabaseUrl, supabaseKey);
+  
+  // S'assurer que supabase est correctement initialisé avant de continuer
+  console.log("Supabase initialisé:", !!supabase);
 </script>
 
 <!-- Scripts personnalisés -->

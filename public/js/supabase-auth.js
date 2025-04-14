@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Références aux éléments du formulaire de connexion
-  const loginForm = document.querySelector('#profil-content form:first-of-type');
+  const loginForm = document.querySelector('#loginForm');
   if (!loginForm) {
     console.error("Le formulaire de connexion n'a pas été trouvé");
     return;
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginButton = loginForm.querySelector('button');
 
   // Références aux éléments du formulaire d'inscription
-  const signupForm = document.querySelector('#profil-content form:nth-of-type(2)');
+  const signupForm = document.querySelector('#signupForm');
   if (!signupForm) {
     console.error("Le formulaire d'inscription n'a pas été trouvé");
     return;

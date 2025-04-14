@@ -252,3 +252,87 @@ function showContactForm(eleveur) {
       <button id="closeContactModalBtn" class="absolute top-4 right-4">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
           <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-bold text-gray-800">Contacter ${eleveur.nom}</h3>
+      <p class="mt-2 text-gray-700">Votre message sera envoyé à ${eleveur.contact}.</p>
+      
+      <form id="contactForm" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Sujet</label>
+          <input type="text" id="contactSubject" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Demande d'information sur votre recherche de chien">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Message</label>
+          <textarea id="contactMessage" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre message ici..."></textarea>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="contactCopy" class="h-4 w-4 text-basque-red focus:ring-basque-red border-gray-300 rounded">
+          <label for="contactCopy" class="ml-2 block text-sm text-gray-700">Recevoir une copie de ce message</label>
+        </div>
+        <button type="submit" id="sendContactBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+          Envoyer le message
+        </button>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaire d'événements pour fermer la modale
+  document.getElementById('closeContactModalBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('contactModalOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Gestionnaire d'événements pour l'envoi du formulaire
+  document.getElementById('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value;
+    const sendCopy = document.getElementById('contactCopy').checked;
+    
+    if (subject && message) {
+      // Changer le bouton en indicateur de chargement
+      const sendBtn = document.getElementById('sendContactBtn');
+      sendBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      sendBtn.disabled = true;
+      
+      // Envoyer le message
+      db.collection('messages').add({
+        from: auth.currentUser.uid,
+        to: eleveur.id,
+        subject: subject,
+        message: message,
+        sendCopy: sendCopy,
+        status: 'sent',
+        createdAt: new Date()
+      })
+      .then(() => {
+        // Fermer la modale
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+        
+        // Afficher un message de succès
+        showMessage('Votre message a été envoyé avec succès.', 'success');
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'envoi du message: ", error);
+        sendBtn.textContent = 'Envoyer le message';
+        sendBtn.disabled = false;
+        showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+      });
+    } else {
+      showMessage('Veuillez remplir tous les champs.', 'warning');
+    }
+  });
+}

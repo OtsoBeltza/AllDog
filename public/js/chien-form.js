@@ -1,9 +1,10 @@
 // Gestion du formulaire d'ajout de chien
 
 // Fonction pour créer le formulaire
-function createDogForm() {
+async function createDogForm() {
   // Vérifier si l'utilisateur est connecté
-  if (!auth.currentUser) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     showTab('profil');
     showMessage('Veuillez vous connecter pour ajouter un chien.', 'warning');
     return;
@@ -226,7 +227,7 @@ function createDogForm() {
   }
   
   // Soumission du formulaire
-  document.getElementById('dogForm').addEventListener('submit', (e) => {
+  document.getElementById('dogForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const dogName = document.getElementById('dogName').value;
@@ -252,80 +253,81 @@ function createDogForm() {
     submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
     submitBtn.disabled = true;
     
-    // Ajouter le chien à Firestore
-    db.collection('chiens').add({
-      nom: dogName,
-      race: dogBreed,
-      age: dogAge,
-      sexe: dogSex,
-      localisation: dogLocation,
-      description: dogDescription,
-      proprietaire: {
-        nom: ownerName,
-        telephone: ownerPhone,
-        email: ownerEmail,
-        userId: auth.currentUser.uid
-      },
-      statut: 'En attente',
-      evaluation: 'Non évalué',
-      photoURL: null, // On mettra à jour après l'upload
-      createdAt: new Date()
-    })
-    .then((docRef) => {
-      console.log("Chien ajouté avec ID: ", docRef.id);
+    try {
+      // Obtenir l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // Si une photo a été sélectionnée, l'uploader vers Firebase Storage
+      // Préparer les données du chien
+      const dogData = {
+        nom: dogName,
+        race: dogBreed,
+        age: dogAge,
+        sexe: dogSex,
+        localisation: dogLocation,
+        description: dogDescription,
+        proprietaire_id: user.id,
+        statut: 'En attente',
+        evaluation: 'Non évalué'
+      };
+      
+      // Si une photo a été téléchargée, la traiter
+      let photoUrl = null;
       if (dogPhoto) {
-        // Ici, vous devez implémenter l'upload vers Firebase Storage
-        // Comme Firebase Storage nécessite une configuration supplémentaire,
-        // nous allons simuler l'upload pour simplifier
-        setTimeout(() => {
-          // Simuler une URL de photo
-          const photoURL = 'https://source.unsplash.com/random/300x300/?dog';
+        // Créer un nom de fichier unique
+        const fileExt = dogPhoto.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `dogs/${fileName}`;
+        
+        // Uploader la photo vers le stockage Supabase
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(filePath, dogPhoto);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        // Obtenir l'URL publique de la photo
+        const { data: urlData } = supabase.storage
+          .from('photos')
+          .getPublicUrl(filePath);
           
-          // Mettre à jour le document avec l'URL de la photo
-          db.collection('chiens').doc(docRef.id).update({
-            photoURL: photoURL
-          })
-          .then(() => {
-            finishSubmission();
-          })
-          .catch((error) => {
-            console.error("Erreur lors de la mise à jour de la photo: ", error);
-            finishSubmission();
-          });
-        }, 1500);
-      } else {
-        finishSubmission();
+        photoUrl = urlData.publicUrl;
+        dogData.photo_url = photoUrl;
       }
       
-      function finishSubmission() {
-        // Fermer le formulaire
-        document.body.removeChild(content);
-        document.body.style.overflow = '';
-        
-        // Afficher un message de succès
-        showMessage('Votre chien a été ajouté avec succès. Notre équipe va vous contacter pour planifier l\'évaluation.', 'success');
-        
-        // Rafraîchir l'affichage des chiens
-        fetchAndDisplayDogs();
-      }
-    })
-    .catch((error) => {
+      // Ajouter le chien à la base de données
+      const { data: dogInsertData, error: dogInsertError } = await supabase
+        .from('chiens')
+        .insert([dogData]);
+      
+      if (dogInsertError) throw dogInsertError;
+      
+      // Fermer le formulaire et afficher un message de succès
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      showMessage('Votre chien a été ajouté avec succès. Notre équipe va vous contacter pour planifier l\'évaluation.', 'success');
+      
+      // Rafraîchir l'affichage des chiens
+      fetchAndDisplayDogs();
+      
+    } catch (error) {
       console.error("Erreur lors de l'ajout du chien: ", error);
       submitBtn.textContent = 'Soumettre mon chien';
       submitBtn.disabled = false;
       showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
-    });
+    }
   });
 }
 
 // Ajouter des gestionnaires d'événements pour les boutons d'ajout de chien
 document.addEventListener('DOMContentLoaded', () => {
   // Bouton dans la page des chiens
-  document.getElementById('inscrireChienBtn').addEventListener('click', () => {
+  document.getElementById('inscrireChienBtn').addEventListener('click', async () => {
     // Si l'utilisateur est connecté, afficher le formulaire
-    if (auth.currentUser) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       createDogForm();
     } else {
       // Sinon, rediriger vers la page de profil
@@ -335,9 +337,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Bouton dans la page de profil
-  document.getElementById('inscriptionChienBtn').addEventListener('click', () => {
+  document.getElementById('inscriptionChienBtn').addEventListener('click', async () => {
     // Si l'utilisateur est connecté, afficher le formulaire
-    if (auth.currentUser) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       createDogForm();
     } else {
       // Mettre en évidence le formulaire de connexion

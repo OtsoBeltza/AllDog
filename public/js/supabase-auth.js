@@ -171,6 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
           userProfile.remove();
         }
         document.querySelector('#profil-content .bg-white.hidden')?.classList.remove('hidden');
+        
+        // Cacher le bouton d'administration si visible
+        const adminBtn = document.getElementById('adminBtn');
+        if (adminBtn) {
+          adminBtn.classList.add('hidden');
+        }
       }
     });
   } catch (error) {
@@ -235,7 +241,8 @@ async function updateUIForLoggedInUser(user) {
     // Utiliser les données du profil ou les métadonnées de l'utilisateur
     const userData = profile || {
       name: user.user_metadata?.name || 'Utilisateur',
-      type: user.user_metadata?.type || 'utilisateur'
+      type: user.user_metadata?.type || 'utilisateur',
+      role: profile?.role || null
     };
     
     // Masquer les formulaires de connexion/inscription
@@ -264,7 +271,9 @@ async function updateUIForLoggedInUser(user) {
           <p class="mt-1 px-2 py-1 rounded-full text-xs font-medium bg-basque-cream inline-block">
             ${userData.type === 'eleveur' ? 'Éleveur/Berger' : 
              userData.type === 'proprietaire' ? 'Propriétaire de chien' :
-             userData.type === 'refuge' ? 'Représentant de refuge' : 'Utilisateur'}
+             userData.type === 'refuge' ? 'Représentant de refuge' : 
+             userData.type === 'admin' ? 'Administrateur' : 'Utilisateur'}
+             ${userData.role === 'admin' ? ' <span class="ml-1 px-1 py-0.5 bg-basque-red text-white rounded-full text-xs">Admin</span>' : ''}
           </p>
         </div>
       </div>
@@ -272,6 +281,7 @@ async function updateUIForLoggedInUser(user) {
       <div class="mt-8 border-t border-gray-200 pt-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4">Mes actions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Si l'utilisateur est un éleveur, on affiche le bouton "Décrire mon élevage" -->
           ${userData.type === 'eleveur' ? `
           <button id="eleveurDescriptionBtn" class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
             <div class="w-10 h-10 rounded-full bg-basque-green flex items-center justify-center text-white">
@@ -283,6 +293,22 @@ async function updateUIForLoggedInUser(user) {
             <div class="ml-3">
               <h4 class="font-bold">Décrire mon élevage</h4>
               <p class="text-sm text-gray-600">Précisez votre besoin en chien de troupeau</p>
+            </div>
+          </button>
+          
+          <!-- NOUVEAU: Permettre aux éleveurs d'ajouter aussi des chiens -->
+          <button id="eleveurAddDogBtn" class="p-4 border border-gray-200 rounded-lg flex items-center text-left">
+            <div class="w-10 h-10 rounded-full bg-basque-red flex items-center justify-center text-white">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9l7.5-5 7.5 5v8.5c0 .83-.67 1.5-1.5 1.5h-12c-.83 0-1.5-.67-1.5-1.5V9z"></path>
+                <path d="M16 3v4"></path>
+                <circle cx="8" cy="14" r="2"></circle>
+                <circle cx="16" cy="14" r="2"></circle>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h4 class="font-bold">Ajouter un chien</h4>
+              <p class="text-sm text-gray-600">Inscrivez un chien à placer</p>
             </div>
           </button>
           ` : ''}
@@ -358,7 +384,7 @@ async function updateUIForLoggedInUser(user) {
       });
     }
     
-    // Ajouter le gestionnaire pour ajouter un chien
+    // Ajouter le gestionnaire pour ajouter un chien (pour les propriétaires et refuges)
     const addDogBtn = document.getElementById('addDogBtn');
     if (addDogBtn) {
       addDogBtn.addEventListener('click', () => {
@@ -371,7 +397,7 @@ async function updateUIForLoggedInUser(user) {
       });
     }
     
-    // NOUVEAU: Ajouter le gestionnaire pour "Décrire mon élevage"
+    // Ajouter le gestionnaire pour "Décrire mon élevage" (pour les éleveurs)
     const eleveurDescriptionBtn = document.getElementById('eleveurDescriptionBtn');
     if (eleveurDescriptionBtn) {
       eleveurDescriptionBtn.addEventListener('click', () => {
@@ -379,11 +405,60 @@ async function updateUIForLoggedInUser(user) {
       });
     }
     
-    // NOUVEAU: Ajouter le gestionnaire pour "Paramètres du compte"
+    // Ajouter le gestionnaire pour le bouton d'ajout de chien des éleveurs
+    const eleveurAddDogBtn = document.getElementById('eleveurAddDogBtn');
+    if (eleveurAddDogBtn) {
+      eleveurAddDogBtn.addEventListener('click', () => {
+        if (typeof createDogForm === 'function') {
+          createDogForm();
+        } else {
+          console.error("La fonction createDogForm n'est pas définie");
+          showMessage("La fonctionnalité d'ajout de chien n'est pas disponible actuellement.", "error");
+        }
+      });
+    }
+    
+    // Ajouter le gestionnaire pour "Paramètres du compte"
     const settingsBtn = document.getElementById('settingsBtn');
     if (settingsBtn) {
       settingsBtn.addEventListener('click', () => {
         showUserSettings(user, userData);
+      });
+    }
+    
+    // Vérifier si l'utilisateur est administrateur et afficher le bouton d'admin
+    if (typeof isAdmin === 'function') {
+      isAdmin(user).then(adminStatus => {
+        if (adminStatus) {
+          // Afficher le bouton d'administration dans le menu
+          const adminBtn = document.getElementById('adminBtn');
+          if (adminBtn) {
+            adminBtn.classList.remove('hidden');
+            adminBtn.addEventListener('click', () => showAdminPanel());
+          }
+          
+          // Ajouter également un bouton d'administration dans le profil
+          const actionsGrid = userProfileDiv.querySelector('.grid');
+          if (actionsGrid) {
+            const adminButton = document.createElement('button');
+            adminButton.className = 'p-4 border border-gray-200 rounded-lg flex items-center text-left';
+            adminButton.innerHTML = `
+              <div class="w-10 h-10 rounded-full bg-basque-red flex items-center justify-center text-white">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h4 class="font-bold">Panel d'administration</h4>
+                <p class="text-sm text-gray-600">Gérer le site</p>
+              </div>
+            `;
+            actionsGrid.appendChild(adminButton);
+            
+            // Ajouter le gestionnaire d'événement
+            adminButton.addEventListener('click', () => showAdminPanel());
+          }
+        }
       });
     }
     
@@ -392,7 +467,7 @@ async function updateUIForLoggedInUser(user) {
   }
 }
 
-// NOUVEAU: Fonction pour afficher les paramètres utilisateur
+// Fonction pour afficher les paramètres utilisateur
 function showUserSettings(user, userData) {
   // Vérifier si l'utilisateur est connecté
   if (!user) {
@@ -533,7 +608,7 @@ function showUserSettings(user, userData) {
   });
 }
 
-// NOUVEAU: Fonction pour créer le formulaire d'élevage
+// Fonction pour créer le formulaire d'élevage
 function createEleveurForm() {
   const supabase = window.supabaseClient;
   if (!supabase) {

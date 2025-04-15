@@ -481,7 +481,7 @@ async function setupAdminAccount() {
     try {
       // Créer l'utilisateur admin
       const { data, error } = await supabase.auth.signUp({
-        email: 'kerlow@berger-connect.fr', // Utiliser une adresse email basée sur le domaine
+        email: 'pierocarlo@gmx.fr', // Utiliser une adresse email basée sur le domaine
         password: 'aslaugaruda',
         options: {
           data: {

@@ -459,3 +459,60 @@ function showDogEvaluationForm(dog) {
     }
   });
 }
+
+// Fonction pour créer un compte administrateur si nécessaire
+async function setupAdminAccount() {
+  const supabase = window.supabaseClient;
+  if (!supabase) return;
+  
+  // Vérifier si le compte admin existe déjà
+  const { data: existingUsers, error: searchError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'admin');
+    
+  if (searchError) {
+    console.error("Erreur lors de la recherche d'administrateurs:", searchError);
+    return;
+  }
+  
+  // Si aucun admin n'existe, créer le compte
+  if (!existingUsers || existingUsers.length === 0) {
+    try {
+      // Créer l'utilisateur admin
+      const { data, error } = await supabase.auth.signUp({
+        email: 'kerlow@berger-connect.fr', // Utiliser une adresse email basée sur le domaine
+        password: 'aslaugaruda',
+        options: {
+          data: {
+            name: 'Kerlow',
+            type: 'admin'
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Ajouter le profil avec le rôle admin
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: data.user.id,
+            name: 'Kerlow',
+            type: 'admin',
+            role: 'admin'
+          }
+        ]);
+        
+      if (profileError) throw profileError;
+      
+      console.log('Compte administrateur créé avec succès.');
+    } catch (error) {
+      console.error("Erreur lors de la création du compte administrateur:", error);
+    }
+  }
+}
+
+// Appel de la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', setupAdminAccount);

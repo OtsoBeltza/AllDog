@@ -485,7 +485,7 @@ async function setupAdminAccount() {
         password: 'aslaugaruda',
         options: {
           data: {
-            name: 'Kerlow',
+            name: 'Pierocarlo',
             type: 'admin'
           }
         }
@@ -499,7 +499,7 @@ async function setupAdminAccount() {
         .insert([
           {
             id: data.user.id,
-            name: 'Kerlow',
+            name: 'Pierocarlo',
             type: 'admin',
             role: 'admin'
           }

@@ -194,11 +194,14 @@ async function createDogForm() {
       }
     });
     
+    // FONCTION MODIFIÉE : Ajout de logs et d'une meilleure gestion des erreurs
     function displayImagePreview(file) {
       if (!file.type.match('image.*')) {
         showMessage('Veuillez sélectionner une image.', 'warning');
         return;
       }
+      
+      console.log("Prévisualisation de l'image:", file.name, "Taille:", Math.round(file.size/1024), "KB");
       
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -231,10 +234,76 @@ async function createDogForm() {
         });
       }
       
+      reader.onerror = function(error) {
+        console.error("Erreur lors de la lecture du fichier:", error);
+        showMessage('Erreur lors de la prévisualisation de l\'image.', 'error');
+      };
+      
       reader.readAsDataURL(file);
     }
     
-    // Soumission du formulaire
+    // NOUVELLE FONCTION : Extraction de la logique d'upload pour une meilleure lisibilité et gestion des erreurs
+    async function uploadDogPhoto(dogPhoto, supabase) {
+      // Si une photo a été téléchargée, la traiter
+      let photoUrl = null;
+      if (dogPhoto) {
+        try {
+          console.log("Début de l'upload de la photo:", dogPhoto.name);
+          
+          // Vérifier que le bucket "photos" existe
+          const { data: buckets, error: bucketError } = await supabase
+            .storage
+            .listBuckets();
+          
+          if (bucketError) {
+            console.error("Erreur lors de la vérification des buckets:", bucketError);
+            throw bucketError;
+          }
+          
+          const photosBucketExists = buckets.some(bucket => bucket.name === 'photos');
+          if (!photosBucketExists) {
+            console.error("Le bucket 'photos' n'existe pas dans Supabase");
+            throw new Error("Le bucket 'photos' n'existe pas. Veuillez le créer dans votre projet Supabase.");
+          }
+          
+          // Créer un nom de fichier unique
+          const fileExt = dogPhoto.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+          const filePath = `dogs/${fileName}`;
+          
+          console.log("Chemin du fichier pour l'upload:", filePath);
+          
+          // Uploader la photo vers le stockage Supabase
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(filePath, dogPhoto, {
+              cacheControl: '3600',
+              upsert: false
+            });
+          
+          if (uploadError) {
+            console.error("Erreur lors de l'upload:", uploadError);
+            throw uploadError;
+          }
+          
+          // Obtenir l'URL publique de la photo
+          const { data: urlData } = supabase.storage
+            .from('photos')
+            .getPublicUrl(filePath);
+          
+          console.log("URL obtenue pour la photo:", urlData);  
+          photoUrl = urlData.publicUrl;
+          console.log("URL finale de la photo:", photoUrl);
+        } catch (error) {
+          console.error("Erreur complète lors de l'upload de la photo:", error);
+          throw error;
+        }
+      }
+      
+      return photoUrl;
+    }
+    
+    // SOUMISSION DU FORMULAIRE MODIFIÉE
     document.getElementById('dogForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -281,30 +350,18 @@ async function createDogForm() {
           evaluation: 'Non évalué'
         };
         
-        // Si une photo a été téléchargée, la traiter
-        let photoUrl = null;
+        // Gérer l'upload de la photo
         if (dogPhoto) {
-          // Créer un nom de fichier unique
-          const fileExt = dogPhoto.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          const filePath = `dogs/${fileName}`;
-          
-          // Uploader la photo vers le stockage Supabase
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('photos')
-            .upload(filePath, dogPhoto);
-          
-          if (uploadError) {
-            throw uploadError;
+          try {
+            const photoUrl = await uploadDogPhoto(dogPhoto, supabase);
+            if (photoUrl) {
+              dogData.photo_url = photoUrl;
+            }
+          } catch (photoError) {
+            console.error("Erreur lors de l'upload de la photo:", photoError);
+            // On continue malgré l'erreur de photo, pour au moins sauvegarder les infos du chien
+            showMessage("Impossible d'uploader la photo, mais les informations du chien seront sauvegardées.", 'warning');
           }
-          
-          // Obtenir l'URL publique de la photo
-          const { data: urlData } = supabase.storage
-            .from('photos')
-            .getPublicUrl(filePath);
-            
-          photoUrl = urlData.publicUrl;
-          dogData.photo_url = photoUrl;
         }
         
         // Ajouter le chien à la base de données
@@ -312,7 +369,10 @@ async function createDogForm() {
           .from('chiens')
           .insert([dogData]);
         
-        if (dogInsertError) throw dogInsertError;
+        if (dogInsertError) {
+          console.error("Erreur détaillée lors de l'ajout du chien:", dogInsertError);
+          throw dogInsertError;
+        }
         
         // Fermer le formulaire et afficher un message de succès
         document.body.removeChild(content);
@@ -329,7 +389,7 @@ async function createDogForm() {
         console.error("Erreur lors de l'ajout du chien: ", error);
         submitBtn.textContent = 'Soumettre mon chien';
         submitBtn.disabled = false;
-        showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+        showMessage('Une erreur s\'est produite: ' + (error.message || 'Veuillez réessayer.'), 'error');
       }
     });
   } catch (error) {

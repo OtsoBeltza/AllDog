@@ -405,8 +405,39 @@ function createDogCard(chien) {
   return div;
 }
 
+// Mise à jour de la fonction showDogDetails pour ajouter les fonctionnalités demandées
+
 // Fonction optimisée pour afficher les détails d'un chien
-function showDogDetails(chien) {
+async function showDogDetails(chien) {
+  // Vérifier si l'utilisateur est connecté
+  const supabase = window.supabaseClient;
+  let user = null;
+  let userProfile = null;
+  let isUserAdmin = false;
+  
+  if (supabase) {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      user = userData.user;
+      
+      if (user) {
+        // Récupérer le profil
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        userProfile = profile;
+        
+        // Vérifier si l'utilisateur est admin
+        isUserAdmin = user.email === 'pierocarlo@gmx.fr' || (profile && profile.role === 'admin');
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'utilisateur:", error);
+    }
+  }
+  
   const content = document.createElement('div');
   content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
   
@@ -441,12 +472,128 @@ function showDogDetails(chien) {
       </div>
     `;
   } else {
+    // Évaluation complète avec notes sous forme visuelle
     evaluationContent = `
-      <div class="flex items-start text-green-700">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 mt-1">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <p class="text-sm">${chien.evaluation}</p>
+      <div class="flex flex-col space-y-3">
+        <div class="flex items-start text-green-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 mt-1">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <div>
+            <p class="text-sm font-medium mb-2">Évaluation complète</p>
+            <p class="text-sm">${chien.evaluation}</p>
+          </div>
+        </div>
+        
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <div>
+            <p class="text-xs font-medium text-gray-600">Obéissance</p>
+            <div class="flex mt-1">
+              ${Array.from({length: 5}, (_, i) => `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mr-1 ${i < chien.obedience ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                  ${i+1}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-xs font-medium text-gray-600">Instinct</p>
+            <div class="flex mt-1">
+              ${Array.from({length: 5}, (_, i) => `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mr-1 ${i < chien.instinct ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                  ${i+1}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-xs font-medium text-gray-600">Sociabilité</p>
+            <div class="flex mt-1">
+              ${Array.from({length: 5}, (_, i) => `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mr-1 ${i < chien.sociability ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                  ${i+1}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-xs font-medium text-gray-600">Énergie</p>
+            <div class="flex mt-1">
+              ${Array.from({length: 5}, (_, i) => `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mr-1 ${i < chien.energy ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                  ${i+1}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        
+        ${chien.recommendations ? `
+          <div class="mt-2">
+            <p class="text-xs font-medium text-gray-600">Recommandations</p>
+            <p class="text-sm mt-1">${chien.recommendations}</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+  
+  // Déterminer le bon bouton à afficher en fonction du statut et des permissions
+  let actionButtons = '';
+  
+  // Si l'utilisateur n'est pas connecté
+  if (!user) {
+    actionButtons = `
+      <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition text-sm w-full" id="loginToContactBtn">
+        Se connecter pour contacter
+      </button>
+    `;
+  } 
+  // Si l'utilisateur est connecté
+  else {
+    // Bouton pour contacter le propriétaire (pour tous les utilisateurs connectés)
+    const contactBtn = `
+      <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition text-sm w-full sm:w-auto" id="contactProprietaireBtn">
+        Contacter le propriétaire
+      </button>
+    `;
+    
+    // Bouton d'évaluation selon le contexte
+    let evaluationBtn = '';
+    
+    // Si le chien est déjà évalué, afficher "Voir l'évaluation" pour tous
+    if (chien.statut === 'Évalué' && chien.evaluation !== 'Non évalué' && chien.evaluation !== 'En cours') {
+      evaluationBtn = `
+        <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition text-sm w-full sm:w-auto" id="voirEvaluationBtn">
+          Voir l'évaluation détaillée
+        </button>
+      `;
+    } 
+    // Si l'utilisateur est admin, afficher "Évaluer le chien"
+    else if (isUserAdmin) {
+      evaluationBtn = `
+        <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition text-sm w-full sm:w-auto" id="evaluerChienBtn">
+          Évaluer le chien
+        </button>
+      `;
+    }
+    // Sinon, pour les propriétaires et éleveurs, afficher "Demander une évaluation"
+    else if (userProfile && (userProfile.type === 'proprietaire' || userProfile.type === 'eleveur' || userProfile.type === 'refuge')) {
+      evaluationBtn = `
+        <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition text-sm w-full sm:w-auto" id="demanderEvaluationBtn">
+          Demander une évaluation
+        </button>
+      `;
+    }
+    
+    // Construire les boutons complets
+    actionButtons = `
+      <div class="flex flex-col sm:flex-row gap-2">
+        ${contactBtn}
+        ${evaluationBtn}
       </div>
     `;
   }
@@ -509,13 +656,8 @@ function showDogDetails(chien) {
           </p>
         </div>
         
-        <div class="mt-4 flex flex-col sm:flex-row gap-2">
-          <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition text-sm w-full sm:w-auto" id="contactProprietaireBtn">
-            Contacter le propriétaire
-          </button>
-          <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition text-sm w-full sm:w-auto" id="demanderEvaluationBtn">
-            Demander une évaluation
-          </button>
+        <div class="mt-4">
+          ${actionButtons}
         </div>
       </div>
     </div>
@@ -537,23 +679,481 @@ function showDogDetails(chien) {
     document.body.style.overflow = '';
   });
   
-  // Gestionnaires pour les boutons d'action
-  document.getElementById('contactProprietaireBtn')?.addEventListener('click', async () => {
-    // Vérifier si l'utilisateur est connecté
-    const supabase = window.supabaseClient;
-    if (!supabase) {
-      showMessage("Erreur de connexion au service", "error");
+  // Gestionnaire pour le bouton de connexion
+  const loginToContactBtn = document.getElementById('loginToContactBtn');
+  if (loginToContactBtn) {
+    loginToContactBtn.addEventListener('click', () => {
+      showTab('profil');
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+    });
+  }
+  
+  // Gestionnaire pour contacter le propriétaire
+  const contactProprietaireBtn = document.getElementById('contactProprietaireBtn');
+  if (contactProprietaireBtn) {
+    contactProprietaireBtn.addEventListener('click', () => {
+      // Fermer la modal de détails
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      // Ouvrir le formulaire de contact
+      showDogContactForm(chien, user);
+    });
+  }
+  
+  // Gestionnaire pour demander une évaluation
+  const demanderEvaluationBtn = document.getElementById('demanderEvaluationBtn');
+  if (demanderEvaluationBtn) {
+    demanderEvaluationBtn.addEventListener('click', () => {
+      // Fermer la modal de détails
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      // Ouvrir le formulaire de demande d'évaluation
+      showEvaluationRequestForm(chien, user, userProfile);
+    });
+  }
+  
+  // Gestionnaire pour évaluer le chien (admin uniquement)
+  const evaluerChienBtn = document.getElementById('evaluerChienBtn');
+  if (evaluerChienBtn && isUserAdmin) {
+    evaluerChienBtn.addEventListener('click', () => {
+      // Fermer la modal de détails
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      
+      // Ouvrir le formulaire d'évaluation
+      if (typeof showDogEvaluationForm === 'function') {
+        showDogEvaluationForm(chien);
+      } else {
+        showMessage('Fonction d\'évaluation non disponible.', 'error');
+      }
+    });
+  }
+  
+  // Gestionnaire pour voir l'évaluation détaillée
+  const voirEvaluationBtn = document.getElementById('voirEvaluationBtn');
+  if (voirEvaluationBtn) {
+    voirEvaluationBtn.addEventListener('click', () => {
+      // Afficher une modal avec l'évaluation détaillée
+      showDetailedEvaluation(chien);
+    });
+  }
+}
+
+// Fonction pour afficher le formulaire de contact avec le propriétaire
+function showDogContactForm(chien, user) {
+  if (!user) {
+    showMessage('Vous devez être connecté pour contacter le propriétaire.', 'warning');
+    showTab('profil');
+    return;
+  }
+  
+  const content = document.createElement('div');
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
+  
+  content.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="contactModalOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-4 z-10 max-h-[90vh] overflow-auto">
+      <button id="closeContactModalBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-bold text-gray-800 pr-8">Contacter le propriétaire de ${chien.nom}</h3>
+      <p class="mt-1 text-sm text-gray-700">Votre message sera envoyé au propriétaire du chien.</p>
+      
+      <form id="contactForm" class="mt-4 space-y-3">
+        <input type="hidden" id="dogId" value="${chien.id}">
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Sujet</label>
+          <input type="text" id="contactSubject" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Intérêt pour l'adoption de ${chien.nom}" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Message</label>
+          <textarea id="contactMessage" rows="5" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Présentez-vous et expliquez pourquoi vous êtes intéressé par ce chien..." required></textarea>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="contactCopy" class="h-4 w-4 text-basque-red focus:ring-basque-red border-gray-300 rounded">
+          <label for="contactCopy" class="ml-2 block text-sm text-gray-700">Recevoir une copie de ce message</label>
+        </div>
+        
+        <div class="mt-4 flex justify-center">
+          <button type="submit" id="sendContactBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+            Envoyer le message
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaire d'événements pour fermer la modale
+  document.getElementById('closeContactModalBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('contactModalOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Gestionnaire d'événements pour l'envoi du formulaire
+  document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const dogId = document.getElementById('dogId').value;
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value;
+    const sendCopy = document.getElementById('contactCopy').checked;
+    
+    if (subject && message) {
+      // Changer le bouton en indicateur de chargement
+      const sendBtn = document.getElementById('sendContactBtn');
+      sendBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      sendBtn.disabled = true;
+      
+      try {
+        const supabase = window.supabaseClient;
+        if (!supabase) throw new Error("Supabase n'est pas initialisé");
+        
+        // Récupérer le profil de l'utilisateur pour avoir son nom
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', user.id)
+          .single();
+          
+        if (profileError) throw profileError;
+        
+        // Envoyer le message
+        const { error } = await supabase
+          .from('dog_messages')
+          .insert([{
+            chien_id: dogId,
+            from_user_id: user.id,
+            user_name: profile.name,
+            user_email: user.email,
+            subject: subject,
+            message: message,
+            send_copy: sendCopy,
+            status: 'sent'
+          }]);
+          
+        if (error) throw error;
+        
+        // Fermer la modale
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+        
+        // Afficher un message de succès
+        showMessage('Votre message a été envoyé avec succès au propriétaire.', 'success');
+      } catch (error) {
+        console.error("Erreur lors de l'envoi du message: ", error);
+        sendBtn.textContent = 'Envoyer le message';
+        sendBtn.disabled = false;
+        showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+      }
+    } else {
+      showMessage('Veuillez remplir tous les champs.', 'warning');
+    }
+  });
+}
+
+// Fonction pour afficher le formulaire de demande d'évaluation
+function showEvaluationRequestForm(chien, user, userProfile) {
+  if (!user) {
+    showMessage('Vous devez être connecté pour demander une évaluation.', 'warning');
+    showTab('profil');
+    return;
+  }
+  
+  if (!userProfile || !(userProfile.type === 'proprietaire' || userProfile.type === 'eleveur' || userProfile.type === 'refuge')) {
+    showMessage('Vous devez être propriétaire ou éleveur pour demander une évaluation.', 'warning');
+    return;
+  }
+  
+  const content = document.createElement('div');
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
+  
+  content.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="evaluationRequestOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-4 z-10 max-h-[90vh] overflow-auto">
+      <button id="closeEvaluationRequestBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <h3 class="text-xl font-bold text-gray-800 pr-8">Demande d'évaluation pour ${chien.nom}</h3>
+      <p class="mt-1 text-sm text-gray-700">Votre demande sera transmise à notre équipe d'évaluation.</p>
+      
+      <div class="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+        <p class="text-sm text-blue-700">
+          L'évaluation est réalisée gratuitement dans le cadre de notre service de placement. Elle nécessite généralement 1 à 2 jours de travail avec le chien.
+        </p>
+      </div>
+      
+      <form id="evaluationRequestForm" class="mt-4 space-y-3">
+        <input type="hidden" id="dogId" value="${chien.id}">
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Raison de la demande d'évaluation</label>
+          <select id="requestReason" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+            <option value="">Sélectionnez une raison</option>
+            <option value="Adoption">Je souhaite adopter ce chien</option>
+            <option value="Placement">Je souhaite placer ce chien</option>
+            <option value="Information">Je souhaite des informations sur ce chien</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Message (facultatif)</label>
+          <textarea id="requestMessage" rows="4" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Informations complémentaires sur votre demande..."></textarea>
+        </div>
+        
+        <div class="mt-4 flex justify-center">
+          <button type="submit" id="sendRequestBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+            Envoyer la demande
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaire d'événements pour fermer la modale
+  document.getElementById('closeEvaluationRequestBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('evaluationRequestOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Gestionnaire d'événements pour l'envoi du formulaire
+  document.getElementById('evaluationRequestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const dogId = document.getElementById('dogId').value;
+    const reason = document.getElementById('requestReason').value;
+    const message = document.getElementById('requestMessage').value;
+    
+    if (!reason) {
+      showMessage('Veuillez sélectionner une raison pour votre demande.', 'warning');
       return;
     }
     
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      showTab('profil');
-      showMessage('Veuillez vous connecter pour contacter le propriétaire.', 'warning');
+    // Changer le bouton en indicateur de chargement
+    const sendBtn = document.getElementById('sendRequestBtn');
+    sendBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+    sendBtn.disabled = true;
+    
+    try {
+      const supabase = window.supabaseClient;
+      if (!supabase) throw new Error("Supabase n'est pas initialisé");
+      
+      // Envoyer la demande d'évaluation
+      const { error } = await supabase
+        .from('evaluation_requests')
+        .insert([{
+          chien_id: dogId,
+          user_id: user.id,
+          user_name: userProfile.name,
+          reason: reason,
+          message: message,
+          status: 'pending'
+        }]);
+        
+      if (error) throw error;
+      
+      // Fermer la modale
       document.body.removeChild(content);
       document.body.style.overflow = '';
-      return;
+      
+      // Afficher un message de succès
+      showMessage('Votre demande d\'évaluation a été envoyée avec succès. Nous vous contacterons prochainement.', 'success');
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la demande: ", error);
+      sendBtn.textContent = 'Envoyer la demande';
+      sendBtn.disabled = false;
+      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
     }
+  });
+}
+
+// Fonction pour afficher l'évaluation détaillée
+function showDetailedEvaluation(chien) {
+  // Vérifier que le chien est bien évalué
+  if (chien.statut !== 'Évalué' || chien.evaluation === 'Non évalué' || chien.evaluation === 'En cours') {
+    showMessage('Ce chien n\'a pas encore été évalué.', 'warning');
+    return;
+  }
+  
+  const content = document.createElement('div');
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
+  
+  content.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="evaluationDetailOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl p-4 z-10 max-h-[90vh] overflow-auto">
+      <button id="closeEvaluationDetailBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="flex items-center">
+        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-basque-red mr-3">
+          ${chien.photo_url ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">` : 
+          `<div class="w-full h-full bg-basque-red flex items-center justify-center text-white font-bold">${chien.nom.charAt(0)}</div>`}
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-800">Évaluation de ${chien.nom}</h3>
+          <p class="text-sm text-gray-600">${chien.race}, ${chien.age}, ${chien.sexe}</p>
+        </div>
+      </div>
+      
+      <div class="mt-6 space-y-6">
+        <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+          <h4 class="text-green-800 font-medium">Résultats de l'évaluation</h4>
+          <p class="mt-2 text-gray-700">${chien.evaluation}</p>
+        </div>
+        
+        <div>
+          <h4 class="font-medium text-gray-800 mb-3">Caractéristiques</h4>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm font-medium text-gray-700">Obéissance</p>
+              <div class="flex mt-2">
+                ${Array.from({length: 5}, (_, i) => `
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center mr-1 ${i < chien.obedience ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${i+1}
+                  </div>
+                `).join('')}
+              </div>
+              <p class="text-xs text-gray-600 mt-1">
+                ${chien.obedience <= 1 ? 'Faible niveau d\'obéissance' :
+                  chien.obedience <= 3 ? 'Niveau d\'obéissance moyen' :
+                  'Excellent niveau d\'obéissance'}
+              </p>
+            </div>
+            
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm font-medium text-gray-700">Instinct de troupeau</p>
+              <div class="flex mt-2">
+                ${Array.from({length: 5}, (_, i) => `
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center mr-1 ${i < chien.instinct ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${i+1}
+                  </div>
+                `).join('')}
+              </div>
+              <p class="text-xs text-gray-600 mt-1">
+                ${chien.instinct <= 1 ? 'Faible instinct de troupeau' :
+                  chien.instinct <= 3 ? 'Instinct de troupeau moyen' :
+                  'Fort instinct de troupeau'}
+              </p>
+            </div>
+            
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm font-medium text-gray-700">Sociabilité</p>
+              <div class="flex mt-2">
+                ${Array.from({length: 5}, (_, i) => `
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center mr-1 ${i < chien.sociability ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${i+1}
+                  </div>
+                `).join('')}
+              </div>
+              <p class="text-xs text-gray-600 mt-1">
+                ${chien.sociability <= 1 ? 'Peu sociable, méfiant' :
+                  chien.sociability <= 3 ? 'Sociabilité normale' :
+                  'Très sociable et amical'}
+              </p>
+            </div>
+            
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm font-medium text-gray-700">Niveau d'énergie</p>
+              <div class="flex mt-2">
+                ${Array.from({length: 5}, (_, i) => `
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center mr-1 ${i < chien.energy ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${i+1}
+                  </div>
+                `).join('')}
+              </div>
+              <p class="text-xs text-gray-600 mt-1">
+                ${chien.energy <= 1 ? 'Calme, peu d\'énergie' :
+                  chien.energy <= 3 ? 'Niveau d\'énergie modéré' :
+                  'Très énergique, nécessite beaucoup d\'exercice'}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        ${chien.recommendations ? `
+          <div class="p-4 bg-basque-cream rounded-lg border-l-4 border-basque-green">
+            <h4 class="text-basque-green font-medium">Recommandations pour le placement</h4>
+            <p class="mt-2 text-gray-700">${chien.recommendations}</p>
+          </div>
+        ` : ''}
+        
+        <div class="flex justify-center">
+          <button id="contactAboutDogBtn" class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+            Contacter au sujet de ce chien
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaire d'événements pour fermer la modale
+  document.getElementById('closeEvaluationDetailBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('evaluationDetailOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+  });
+  
+  // Gestionnaire pour le bouton de contact
+  document.getElementById('contactAboutDogBtn').addEventListener('click', async () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+    
+    // Vérifier si l'utilisateur est connecté
+    const supabase = window.supabaseClient;
+    if (!supabase) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        showDogContactForm(chien, user);
+      } else {
+        showMessage('Vous devez être connecté pour contacter le propriétaire.', 'warning');
+        showTab('profil');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification de l\'authentification:', error);
+      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+    }
+  });
+}
     
     // Afficher un formulaire de contact pour le propriétaire
     showMessage('Cette fonctionnalité sera bientôt disponible.', 'info');

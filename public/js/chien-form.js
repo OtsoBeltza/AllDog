@@ -18,33 +18,33 @@ async function createDogForm() {
       return;
     }
     
-    // Créer le formulaire en HTML
+    // Créer le formulaire en HTML - MODIFIÉ pour être plus compact et adapté au mobile
     const content = document.createElement('div');
-    content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+    content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
     
     content.innerHTML = `
       <div class="fixed inset-0 bg-black bg-opacity-50" id="dogFormOverlay"></div>
-      <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full p-6 z-10 max-h-90vh overflow-auto">
-        <button id="closeDogFormBtn" class="absolute top-4 right-4">
+      <div class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl p-4 z-10 max-h-[90vh] overflow-auto">
+        <button id="closeDogFormBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
         
-        <h3 class="text-xl font-bold text-gray-800">Ajouter un chien</h3>
-        <p class="mt-2 text-gray-700">Complétez les informations sur le chien à placer. Notre équipe vous contactera pour planifier une évaluation gratuite.</p>
+        <h3 class="text-xl font-bold text-gray-800 pr-8">Ajouter un chien</h3>
+        <p class="mt-1 text-sm text-gray-700">Complétez les informations sur le chien à placer.</p>
         
-        <form id="dogForm" class="mt-6 space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form id="dogForm" class="mt-4 space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="block text-sm font-medium text-gray-700">Nom du chien</label>
-              <input type="text" id="dogName" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+              <input type="text" id="dogName" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700">Race</label>
-              <select id="dogBreed" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+              <select id="dogBreed" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
                 <option value="">Sélectionnez une race</option>
                 <option value="Border Collie">Border Collie</option>
                 <option value="Berger des Pyrénées">Berger des Pyrénées</option>
@@ -57,12 +57,12 @@ async function createDogForm() {
             
             <div>
               <label class="block text-sm font-medium text-gray-700">Âge</label>
-              <input type="text" id="dogAge" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Ex: 2 ans" required>
+              <input type="text" id="dogAge" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Ex: 2 ans" required>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700">Sexe</label>
-              <select id="dogSex" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+              <select id="dogSex" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
                 <option value="">Sélectionnez</option>
                 <option value="Mâle">Mâle</option>
                 <option value="Femelle">Femelle</option>
@@ -71,27 +71,26 @@ async function createDogForm() {
             
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700">Localisation actuelle</label>
-              <input type="text" id="dogLocation" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Ex: Refuge de Bayonne" required>
+              <input type="text" id="dogLocation" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Ex: Refuge de Bayonne" required>
             </div>
             
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700">Description</label>
-              <textarea id="dogDescription" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Caractère, expérience avec le troupeau, raison du placement..." required></textarea>
+              <textarea id="dogDescription" rows="3" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Caractère, expérience avec le troupeau, raison du placement..." required></textarea>
             </div>
             
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700">Photo du chien</label>
-              <div id="photoDropArea" class="mt-1 relative border-2 border-gray-300 border-dashed rounded-lg p-6 flex flex-col justify-center items-center">
+              <div id="photoDropArea" class="mt-1 relative border-2 border-gray-300 border-dashed rounded-lg p-4 flex flex-col justify-center items-center">
                 <input type="file" id="dogPhoto" name="dogPhoto" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                <p class="mt-2 text-sm text-gray-600">Cliquez pour sélectionner ou déposez une image</p>
-                <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                <p class="mt-1 text-xs text-gray-600">Cliquez pour sélectionner ou déposez une image</p>
                 
-                <div id="imagePreviewContainer" class="mt-4 hidden">
-                  <img id="imagePreview" src="#" alt="Aperçu" class="h-32 w-auto mx-auto rounded-lg">
-                  <button type="button" id="removePreview" class="mt-2 inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                <div id="imagePreviewContainer" class="mt-2 hidden">
+                  <img id="imagePreview" src="#" alt="Aperçu" class="h-24 w-auto mx-auto rounded-lg">
+                  <button type="button" id="removePreview" class="mt-1 inline-flex items-center px-2 py-1 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">
                     Supprimer
                   </button>
                 </div>
@@ -99,38 +98,39 @@ async function createDogForm() {
             </div>
           </div>
           
-          <div class="pt-4 border-t border-gray-200">
-            <h4 class="font-medium text-gray-800">Informations de contact</h4>
-            <p class="text-sm text-gray-600">Vos coordonnées seront visibles uniquement par l'administrateur du site.</p>
+          <div class="pt-3 border-t border-gray-200">
+            <h4 class="text-sm font-medium text-gray-800">Informations de contact</h4>
             
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label class="block text-sm font-medium text-gray-700">Nom</label>
-                <input type="text" id="ownerName" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+                <input type="text" id="ownerName" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
               </div>
               
               <div>
                 <label class="block text-sm font-medium text-gray-700">Téléphone</label>
-                <input type="tel" id="ownerPhone" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+                <input type="tel" id="ownerPhone" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
               </div>
               
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="ownerEmail" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
+                <input type="email" id="ownerEmail" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" required>
               </div>
             </div>
           </div>
           
           <div class="flex items-center">
             <input type="checkbox" id="dogTerms" class="h-4 w-4 text-basque-red focus:ring-basque-red border-gray-300 rounded" required>
-            <label for="dogTerms" class="ml-2 block text-sm text-gray-700">
+            <label for="dogTerms" class="ml-2 block text-xs text-gray-700">
               J'accepte les <a href="#" class="text-basque-red hover:underline">conditions d'utilisation</a> et la <a href="#" class="text-basque-red hover:underline">politique de confidentialité</a>
             </label>
           </div>
           
-          <button type="submit" id="submitDogBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-            Soumettre mon chien
-          </button>
+          <div class="mt-4 flex justify-center">
+            <button type="submit" id="submitDogBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+              Soumettre mon chien
+            </button>
+          </div>
         </form>
       </div>
     `;

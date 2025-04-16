@@ -4,6 +4,9 @@
 async function isAdmin(user) {
   if (!user) return false;
   
+  // Admin spécifique
+  if (user.email === 'pierocarlo@gmx.fr') return true;
+  
   const supabase = window.supabaseClient;
   if (!supabase) return false;
   
@@ -36,7 +39,7 @@ async function showAdminPanel() {
     return;
   }
   
-  // Vérifier si l'utilisateur est administrateur
+  // Vérifier strictement si l'utilisateur est l'admin pierocarlo@gmx.fr ou a le rôle admin
   const adminStatus = await isAdmin(user);
   if (!adminStatus) {
     showMessage('Vous n\'avez pas les autorisations nécessaires pour accéder à cette page.', 'error');
@@ -102,14 +105,23 @@ async function loadAdminData(container) {
       
     if (profilesError) throw profilesError;
     
+    // Récupérer les demandes d'évaluation
+    const { data: evaluationRequests, error: requestsError } = await supabase
+      .from('evaluation_requests')
+      .select('*, chien:chien_id (*)')
+      .order('created_at', { ascending: false });
+      
+    if (requestsError) throw requestsError;
+    
     // Construire l'interface
     container.innerHTML = `
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Panneau d'administration</h2>
       
-      <div class="flex space-x-4 mb-6">
-        <button id="tab-chiens" class="px-4 py-2 bg-basque-red text-white rounded-lg">Chiens à évaluer</button>
-        <button id="tab-eleveurs" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">Éleveurs</button>
-        <button id="tab-users" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">Utilisateurs</button>
+      <div class="flex flex-wrap space-x-2 mb-6">
+        <button id="tab-chiens" class="px-4 py-2 mb-2 bg-basque-red text-white rounded-lg">Chiens à évaluer</button>
+        <button id="tab-requests" class="px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg">Demandes d'évaluation ${evaluationRequests.length ? `<span class="ml-1 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs">${evaluationRequests.length}</span>` : ''}</button>
+        <button id="tab-eleveurs" class="px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg">Éleveurs</button>
+        <button id="tab-users" class="px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg">Utilisateurs</button>
       </div>
       
       <!-- Contenu des tabs -->
@@ -150,6 +162,45 @@ async function loadAdminData(container) {
             </tbody>
           </table>
         </div>
+      </div>
+      
+      <!-- Nouveau contenu pour les demandes d'évaluation -->
+      <div id="content-requests" class="hidden bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Demandes d'évaluation (${evaluationRequests.length})</h3>
+        
+        ${evaluationRequests.length === 0 ? `
+          <div class="p-4 bg-gray-50 rounded-lg text-center">
+            <p class="text-gray-700">Aucune demande d'évaluation en attente.</p>
+          </div>
+        ` : `
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chien</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Demandeur</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${evaluationRequests.map(request => `
+                  <tr data-id="${request.id}" class="bg-red-50">
+                    <td class="px-6 py-4 whitespace-nowrap">${request.chien?.nom || 'Chien inconnu'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${request.user_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(request.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4">${request.message || 'Aucun message'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button class="text-basque-green hover:text-basque-green-dark process-request-btn" data-id="${request.id}" data-chien-id="${request.chien_id}">Traiter</button>
+                      <button class="ml-2 text-gray-500 hover:text-gray-700 dismiss-request-btn" data-id="${request.id}">Ignorer</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
       </div>
       
       <div id="content-eleveurs" class="hidden bg-white rounded-xl shadow-lg p-6">
@@ -221,6 +272,7 @@ async function loadAdminData(container) {
     
     // Ajouter les gestionnaires d'événements
     document.getElementById('tab-chiens').addEventListener('click', () => switchAdminTab('chiens'));
+    document.getElementById('tab-requests').addEventListener('click', () => switchAdminTab('requests'));
     document.getElementById('tab-eleveurs').addEventListener('click', () => switchAdminTab('eleveurs'));
     document.getElementById('tab-users').addEventListener('click', () => switchAdminTab('users'));
     
@@ -275,6 +327,63 @@ async function loadAdminData(container) {
       });
     });
     
+    // Gestionnaires pour les demandes d'évaluation
+    document.querySelectorAll('.process-request-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const requestId = btn.getAttribute('data-id');
+        const chienId = btn.getAttribute('data-chien-id');
+        
+        try {
+          // Mettre à jour le statut du chien
+          const { error: updateError } = await supabase
+            .from('chiens')
+            .update({ statut: 'En évaluation', evaluation: 'En cours' })
+            .eq('id', chienId);
+            
+          if (updateError) throw updateError;
+          
+          // Marquer la demande comme traitée
+          const { error: requestError } = await supabase
+            .from('evaluation_requests')
+            .update({ status: 'processed' })
+            .eq('id', requestId);
+            
+          if (requestError) throw requestError;
+          
+          showMessage('La demande a été traitée avec succès.', 'success');
+          
+          // Recharger les données
+          loadAdminData(container);
+        } catch (error) {
+          console.error("Erreur lors du traitement de la demande:", error);
+          showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+        }
+      });
+    });
+    
+    document.querySelectorAll('.dismiss-request-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const requestId = btn.getAttribute('data-id');
+        
+        if (confirm('Êtes-vous sûr de vouloir ignorer cette demande ?')) {
+          try {
+            const { error } = await supabase
+              .from('evaluation_requests')
+              .update({ status: 'dismissed' })
+              .eq('id', requestId);
+              
+            if (error) throw error;
+            
+            showMessage('La demande a été ignorée.', 'success');
+            loadAdminData(container);
+          } catch (error) {
+            console.error("Erreur lors de l'ignorance de la demande:", error);
+            showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+          }
+        }
+      });
+    });
+    
   } catch (error) {
     console.error("Erreur lors du chargement des données d'administration:", error);
     container.innerHTML = `
@@ -297,22 +406,24 @@ async function loadAdminData(container) {
 function switchAdminTab(tabName) {
   // Cacher tous les contenus
   document.getElementById('content-chiens').classList.add('hidden');
+  document.getElementById('content-requests').classList.add('hidden');
   document.getElementById('content-eleveurs').classList.add('hidden');
   document.getElementById('content-users').classList.add('hidden');
   
   // Réinitialiser les styles de tous les onglets
-  document.getElementById('tab-chiens').className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg';
-  document.getElementById('tab-eleveurs').className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg';
-  document.getElementById('tab-users').className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg';
+  document.getElementById('tab-chiens').className = 'px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg';
+  document.getElementById('tab-requests').className = 'px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg';
+  document.getElementById('tab-eleveurs').className = 'px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg';
+  document.getElementById('tab-users').className = 'px-4 py-2 mb-2 bg-gray-200 text-gray-700 rounded-lg';
   
   // Afficher le contenu sélectionné
   document.getElementById(`content-${tabName}`).classList.remove('hidden');
   
   // Mettre en évidence l'onglet sélectionné
-  document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 bg-basque-red text-white rounded-lg';
+  document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 mb-2 bg-basque-red text-white rounded-lg';
 }
 
-// Fonction pour afficher le formulaire d'évaluation d'un chien
+// Fonction améliorée pour afficher le formulaire d'évaluation d'un chien
 function showDogEvaluationForm(dog) {
   const content = document.createElement('div');
   content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
@@ -340,31 +451,87 @@ function showDogEvaluationForm(dog) {
           </select>
         </div>
         
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
-          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
-        </div>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700">Niveau d'obéissance (1-5)</label>
-            <input type="number" id="dogObedience" min="1" max="5" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" value="${dog.obedience || 3}">
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogObedience" value="${value}" class="hidden" ${(dog.obedience || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.obedience || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Faible' : 
+                    value === 3 ? 'Moyen' : 
+                    value === 5 ? 'Excellent' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Niveau d'instinct (1-5)</label>
-            <input type="number" id="dogInstinct" min="1" max="5" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" value="${dog.instinct || 3}">
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogInstinct" value="${value}" class="hidden" ${(dog.instinct || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.instinct || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Faible' : 
+                    value === 3 ? 'Moyen' : 
+                    value === 5 ? 'Fort' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Sociabilité (1-5)</label>
-            <input type="number" id="dogSociability" min="1" max="5" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" value="${dog.sociability || 3}">
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogSociability" value="${value}" class="hidden" ${(dog.sociability || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.sociability || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Craintif' : 
+                    value === 3 ? 'Normal' : 
+                    value === 5 ? 'Très sociable' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
-            <input type="number" id="dogEnergy" min="1" max="5" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" value="${dog.energy || 3}">
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Calme' : 
+                    value === 3 ? 'Modérée' : 
+                    value === 5 ? 'Très actif' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
+          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
         </div>
         
         <div>
@@ -382,15 +549,51 @@ function showDogEvaluationForm(dog) {
   document.body.appendChild(content);
   document.body.style.overflow = 'hidden';
   
+  // Ajouter du style pour la sélection des notes
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    input[type="radio"][name="dogObedience"]:checked + span,
+    input[type="radio"][name="dogInstinct"]:checked + span,
+    input[type="radio"][name="dogSociability"]:checked + span,
+    input[type="radio"][name="dogEnergy"]:checked + span {
+      background-color: #D0202A;
+      color: white;
+    }
+    
+    input[type="radio"] + span:hover {
+      background-color: #e0e0e0;
+    }
+  `;
+  document.head.appendChild(styleElement);
+  
   // Gestionnaire d'événements pour fermer le formulaire
   document.getElementById('closeEvaluationBtn').addEventListener('click', () => {
     document.body.removeChild(content);
     document.body.style.overflow = '';
+    document.head.removeChild(styleElement);
   });
   
   document.getElementById('evaluationOverlay').addEventListener('click', () => {
     document.body.removeChild(content);
     document.body.style.overflow = '';
+    document.head.removeChild(styleElement);
+  });
+  
+  // Gestionnaires pour les boutons de notation
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      // Réinitialiser tous les boutons du même groupe
+      const name = e.target.name;
+      document.querySelectorAll(`input[name="${name}"] + span`).forEach(span => {
+        span.classList.remove('bg-basque-red', 'text-white');
+        span.classList.add('bg-gray-200');
+      });
+      
+      // Mettre en évidence le bouton sélectionné
+      const selectedSpan = e.target.nextElementSibling;
+      selectedSpan.classList.remove('bg-gray-200');
+      selectedSpan.classList.add('bg-basque-red', 'text-white');
+    });
   });
   
   // Soumission du formulaire
@@ -399,10 +602,10 @@ function showDogEvaluationForm(dog) {
     
     const status = document.getElementById('dogStatus').value;
     const evaluation = document.getElementById('dogEvaluation').value;
-    const obedience = document.getElementById('dogObedience').value;
-    const instinct = document.getElementById('dogInstinct').value;
-    const sociability = document.getElementById('dogSociability').value;
-    const energy = document.getElementById('dogEnergy').value;
+    const obedience = document.querySelector('input[name="dogObedience"]:checked')?.value || 3;
+    const instinct = document.querySelector('input[name="dogInstinct"]:checked')?.value || 3;
+    const sociability = document.querySelector('input[name="dogSociability"]:checked')?.value || 3;
+    const energy = document.querySelector('input[name="dogEnergy"]:checked')?.value || 3;
     const recommendations = document.getElementById('dogRecommendations').value;
     
     // Valider les données
@@ -442,6 +645,7 @@ function showDogEvaluationForm(dog) {
       // Fermer le formulaire et afficher un message de succès
       document.body.removeChild(content);
       document.body.style.overflow = '';
+      document.head.removeChild(styleElement);
       
       showMessage('L\'évaluation du chien a été enregistrée avec succès.', 'success');
       
@@ -461,6 +665,8 @@ function showDogEvaluationForm(dog) {
 }
 
 // Fonction pour créer un compte administrateur si nécessaire
+// ATTENTION: Dans une application réelle, ne jamais coder les identifiants en dur comme ceci.
+// Utilisez plutôt une invitation sécurisée ou un processus administratif.
 async function setupAdminAccount() {
   const supabase = window.supabaseClient;
   if (!supabase) return;
@@ -481,7 +687,7 @@ async function setupAdminAccount() {
     try {
       // Créer l'utilisateur admin
       const { data, error } = await supabase.auth.signUp({
-        email: 'pierocarlo@gmx.fr', // Utiliser une adresse email basée sur le domaine
+        email: 'pierocarlo@gmx.fr',
         password: 'aslaugaruda',
         options: {
           data: {

@@ -332,74 +332,58 @@ async function createDogForm() {
 }
 
 // Fonction pour télécharger une photo vers Supabase
+// Fonction pour télécharger une photo vers Supabase
 async function uploadDogPhoto(dogPhoto, supabase) {
   if (!dogPhoto) return null;
   
   try {
     console.log("Début de l'upload de la photo:", dogPhoto.name);
     
-    // Liste des buckets disponibles
-    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-    
-    if (bucketError) {
-      console.error("Erreur lors de la vérification des buckets:", bucketError);
-      throw bucketError;
-    }
-    
-    console.log("Buckets disponibles:", buckets.map(b => b.name).join(', '));
-    
-    // Vérifier si le bucket 'photos' existe
-    const photosBucketExists = buckets.some(bucket => bucket.name === 'photos');
-    if (!photosBucketExists) {
-      console.error("Le bucket 'photos' n'existe pas dans Supabase");
-      // Tenter de créer le bucket
-      try {
-        const { data, error } = await supabase.storage.createBucket('photos', {
-          public: true
-        });
-        if (error) throw error;
-        console.log("Bucket 'photos' créé avec succès");
-      } catch (createError) {
-        console.error("Impossible de créer le bucket 'photos':", createError);
-        throw new Error("Le bucket 'photos' n'existe pas et ne peut pas être créé.");
-      }
-    }
-    
     // Créer un nom de fichier unique
     const fileExt = dogPhoto.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
     const filePath = `${fileName}`; // Pas de sous-dossier pour simplifier
     
-    console.log("Chemin du fichier pour l'upload:", filePath);
+    console.log("Tentative d'upload direct vers le bucket 'photos'");
     
-    // Tester avec un fichier très petit d'abord
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('photos')
-      .upload(filePath, dogPhoto, {
-        cacheControl: '3600',
-        upsert: true
-      });
-    
-    if (uploadError) {
-      console.error("Erreur lors de l'upload:", uploadError);
-      throw uploadError;
+    // Essayer directement l'upload sans vérifier l'existence du bucket
+    try {
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(filePath, dogPhoto, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (uploadError) {
+        console.error("Erreur lors de l'upload:", uploadError);
+        return null; // Retourner null au lieu de générer une erreur
+      }
+      
+      console.log("Upload réussi:", uploadData);
+      
+      // Obtenir l'URL publique de la photo
+      const { data: urlData } = supabase.storage
+        .from('photos')
+        .getPublicUrl(filePath);
+      
+      if (!urlData || !urlData.publicUrl) {
+        console.error("Impossible d'obtenir l'URL publique");
+        return null;
+      }
+      
+      console.log("URL obtenue pour la photo:", urlData);
+      const photoUrl = urlData.publicUrl;
+      console.log("URL finale de la photo:", photoUrl);
+      
+      return photoUrl;
+    } catch (uploadAttemptError) {
+      console.error("Erreur lors de la tentative d'upload direct:", uploadAttemptError);
+      return null; // Retourner null au lieu de générer une erreur
     }
-    
-    console.log("Upload réussi:", uploadData);
-    
-    // Obtenir l'URL publique de la photo
-    const { data: urlData } = supabase.storage
-      .from('photos')
-      .getPublicUrl(filePath);
-    
-    console.log("URL obtenue pour la photo:", urlData);
-    const photoUrl = urlData.publicUrl;
-    console.log("URL finale de la photo:", photoUrl);
-    
-    return photoUrl;
   } catch (error) {
     console.error("Erreur complète lors de l'upload de la photo:", error);
-    throw error;
+    return null; // Permettre la création du chien sans photo
   }
 }
 

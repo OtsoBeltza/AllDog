@@ -755,4 +755,3 @@ function createEleveurForm() {
     }
   });
 }
-}

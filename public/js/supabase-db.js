@@ -1,79 +1,116 @@
 // Gestion des données avec Supabase
 
 // Récupération et affichage des chiens
-async function fetchAndDisplayDogs() {
-  const supabase = window.supabaseClient;
-  if (!supabase) {
-    console.error("Supabase n'est pas initialisé");
+async function renderDogCards() {
+  const container = document.getElementById('chiens-container');
+  const allContainer = document.getElementById('all-chiens-container');
+  
+  if (!container || !allContainer) {
+    console.error("Les conteneurs de chiens n'ont pas été trouvés");
     return;
   }
   
+  // Vider les conteneurs
+  container.innerHTML = '';
+  allContainer.innerHTML = '';
+  
   try {
+    const supabase = window.supabaseClient;
+    if (!supabase) {
+      console.error("Supabase n'est pas initialisé");
+      
+      // Afficher un message d'erreur dans les conteneurs
+      container.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur de connexion à la base de données</div>';
+      allContainer.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur de connexion à la base de données</div>';
+      
+      // Utiliser les données d'exemple si Supabase n'est pas disponible
+      renderExampleDogs();
+      return;
+    }
+    
     // Récupérer les chiens depuis Supabase
-    const { data: chiens, error } = await supabase
+    const { data: chiensBdd, error } = await supabase
       .from('chiens')
       .select('*')
       .order('created_at', { ascending: false });
       
-    if (error) throw error;
-    
-    // Vider les conteneurs
-    const container = document.getElementById('chiens-container');
-    const allContainer = document.getElementById('all-chiens-container');
-    
-    if (!container || !allContainer) {
-      console.error("Les conteneurs de chiens n'ont pas été trouvés");
+    if (error) {
+      console.error("Erreur lors de la récupération des chiens:", error);
+      
+      // Afficher un message d'erreur dans les conteneurs
+      container.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur lors du chargement des chiens</div>';
+      allContainer.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur lors du chargement des chiens</div>';
+      
+      // Utiliser les données d'exemple si erreur
+      renderExampleDogs();
       return;
     }
     
-    container.innerHTML = '';
-    allContainer.innerHTML = '';
-    
-    let count = 0;
-    
-    if (chiens && chiens.length > 0) {
-      chiens.forEach((chien) => {
-        const card = createDogCard(chien);
-        
-        // Ajouter au conteneur principal (3 premiers)
-        if (count < 3) {
-          container.appendChild(card.cloneNode(true));
-        }
-        
-        // Ajouter au conteneur "tous les chiens"
-        allContainer.appendChild(card);
-        
-        count++;
-      });
-    } else {
-      // Si aucun chien, afficher un message
-      const message = document.createElement('div');
-      message.className = 'col-span-full p-6 bg-white rounded-xl shadow-lg text-center';
-      message.innerHTML = `
-        <p class="text-gray-700">Aucun chien disponible pour le moment.</p>
-        <button id="addDogBtn" class="mt-4 px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-          Ajouter un chien
-        </button>
-      `;
+    // Si aucun chien n'est trouvé dans la base de données
+    if (!chiensBdd || chiensBdd.length === 0) {
+      console.log("Aucun chien trouvé dans la base de données, utilisation des exemples");
       
-      container.appendChild(message.cloneNode(true));
-      allContainer.appendChild(message);
+      // Afficher un message dans les conteneurs
+      container.innerHTML = '<div class="col-span-full p-4 bg-yellow-50 rounded-lg text-center text-yellow-700">Aucun chien disponible pour le moment</div>';
+      allContainer.innerHTML = '<div class="col-span-full p-4 bg-yellow-50 rounded-lg text-center text-yellow-700">Aucun chien disponible pour le moment</div>';
       
-      // Ajouter le gestionnaire d'événement
-      document.querySelectorAll('#addDogBtn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          showTab('profil');
-          // Vérifier si l'utilisateur est connecté
-          const supabase = window.supabaseClient;
-          if (supabase && supabase.auth.getUser()) {
-            scrollToInscriptionChien();
-          }
-        });
-      });
+      // Utiliser les données d'exemple
+      renderExampleDogs();
+      return;
     }
+    
+    console.log(`${chiensBdd.length} chiens trouvés dans la base de données`);
+    
+    // Créer les cartes pour les chiens de la base de données
+    chiensBdd.forEach((chien, index) => {
+      const card = createDogCard(chien);
+      
+      // Ajouter au conteneur principal (3 premiers)
+      if (index < 3) {
+        container.appendChild(card.cloneNode(true));
+      }
+      
+      // Ajouter au conteneur "tous les chiens"
+      allContainer.appendChild(card);
+    });
+    
   } catch (error) {
-    console.error("Erreur lors de la récupération des chiens: ", error);
+    console.error("Erreur inattendue lors du chargement des chiens:", error);
+    
+    // Afficher un message d'erreur dans les conteneurs
+    container.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur lors du chargement des chiens</div>';
+    allContainer.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-lg text-center text-red-700">Erreur lors du chargement des chiens</div>';
+    
+    // Utiliser les données d'exemple en cas d'erreur
+    renderExampleDogs();
   }
+}
+
+// Fonction pour afficher les chiens d'exemple (en cas d'erreur)
+function renderExampleDogs() {
+  const container = document.getElementById('chiens-container');
+  const allContainer = document.getElementById('all-chiens-container');
+  
+  // Ajouter un message indiquant que ce sont des exemples
+  const exempleMessage = document.createElement('div');
+  exempleMessage.className = 'col-span-full p-2 mb-4 bg-blue-50 rounded text-blue-700 text-sm text-center';
+  exempleMessage.textContent = 'Affichage des chiens d\'exemple (non connecté à la base de données)';
+  
+  container.appendChild(exempleMessage.cloneNode(true));
+  allContainer.appendChild(exempleMessage);
+  
+  // Créer les cartes pour les chiens d'exemple
+  chiens.forEach((chien, index) => {
+    const card = createDogCard(chien);
+    
+    // Ajouter au conteneur principal (3 premiers)
+    if (index < 3) {
+      container.appendChild(card.cloneNode(true));
+    }
+    
+    // Ajouter au conteneur "tous les chiens"
+    allContainer.appendChild(card);
+  });
 }
 
 // Récupération et affichage des éleveurs
@@ -188,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Charger les données
-  fetchAndDisplayDogs();
+  renderDogCards();
   fetchAndDisplayEleveurs();
 });
 
@@ -234,115 +271,6 @@ async function initializeDatabase() {
   }
 }
 
-// Fonction optimisée pour afficher le formulaire de contact pour un éleveur
-function showContactForm(eleveur) {
-  const content = document.createElement('div');
-  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
-  
-  content.innerHTML = `
-    <div class="fixed inset-0 bg-black bg-opacity-50" id="contactModalOverlay"></div>
-    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-4 z-10 max-h-[90vh] overflow-auto">
-      <button id="closeContactModalBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      
-      <h3 class="text-xl font-bold text-gray-800 pr-8">Contacter ${eleveur.nom}</h3>
-      <p class="mt-1 text-sm text-gray-700">Votre message sera envoyé à ${eleveur.contact}.</p>
-      
-      <form id="contactForm" class="mt-4 space-y-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Sujet</label>
-          <input type="text" id="contactSubject" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Demande d'information sur votre recherche de chien" required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Message</label>
-          <textarea id="contactMessage" rows="3" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre message ici..." required></textarea>
-        </div>
-        <div class="flex items-center">
-          <input type="checkbox" id="contactCopy" class="h-4 w-4 text-basque-red focus:ring-basque-red border-gray-300 rounded">
-          <label for="contactCopy" class="ml-2 block text-sm text-gray-700">Recevoir une copie de ce message</label>
-        </div>
-        
-        <div class="mt-4 flex justify-center">
-          <button type="submit" id="sendContactBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-            Envoyer le message
-          </button>
-        </div>
-      </form>
-    </div>
-  `;
-  
-  document.body.appendChild(content);
-  document.body.style.overflow = 'hidden';
-  
-  // Gestionnaire d'événements pour fermer la modale
-  document.getElementById('closeContactModalBtn').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-  });
-  
-  document.getElementById('contactModalOverlay').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-  });
-  
-  // Gestionnaire d'événements pour l'envoi du formulaire
-  document.getElementById('contactForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const subject = document.getElementById('contactSubject').value;
-    const message = document.getElementById('contactMessage').value;
-    const sendCopy = document.getElementById('contactCopy').checked;
-    
-    if (subject && message) {
-      // Changer le bouton en indicateur de chargement
-      const sendBtn = document.getElementById('sendContactBtn');
-      sendBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-      sendBtn.disabled = true;
-      
-      try {
-        const supabase = window.supabaseClient;
-        if (!supabase) throw new Error("Supabase n'est pas initialisé");
-        
-        // Obtenir l'utilisateur actuel
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        
-        // Envoyer le message
-        const { error } = await supabase
-          .from('messages')
-          .insert([{
-            from_user_id: user.id,
-            to_eleveur_id: eleveur.id,
-            subject: subject,
-            message: message,
-            send_copy: sendCopy,
-            status: 'sent'
-          }]);
-          
-        if (error) throw error;
-        
-        // Fermer la modale
-        document.body.removeChild(content);
-        document.body.style.overflow = '';
-        
-        // Afficher un message de succès
-        showMessage('Votre message a été envoyé avec succès.', 'success');
-      } catch (error) {
-        console.error("Erreur lors de l'envoi du message: ", error);
-        sendBtn.textContent = 'Envoyer le message';
-        sendBtn.disabled = false;
-        showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
-      }
-    } else {
-      showMessage('Veuillez remplir tous les champs.', 'warning');
-    }
-  });
-}
-
 // Fonction pour créer une carte de chien
 function createDogCard(chien) {
   const div = document.createElement('div');
@@ -379,9 +307,20 @@ function createDogCard(chien) {
     `;
   }
   
+  // Afficher l'image si disponible, sinon un placeholder
+  const imageHTML = chien.photo_url 
+    ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">`
+    : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>`;
+  
   div.innerHTML = `
-    <div class="h-48 bg-gray-200 flex items-center justify-center">
-      ${chien.photo_url ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">` : '<span class="text-gray-400">Image</span>'}
+    <div class="h-48 bg-gray-100 flex items-center justify-center">
+      ${imageHTML}
     </div>
     <div class="p-4">
       <div class="flex justify-between items-center">
@@ -404,8 +343,6 @@ function createDogCard(chien) {
   
   return div;
 }
-
-// Mise à jour de la fonction showDogDetails pour ajouter les fonctionnalités demandées
 
 // Fonction optimisée pour afficher les détails d'un chien
 async function showDogDetails(chien) {
@@ -598,25 +535,36 @@ async function showDogDetails(chien) {
     `;
   }
   
+  // Afficher l'image si disponible, sinon un placeholder
+  const imageHTML = chien.photo_url 
+    ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">`
+    : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>`;
+  
   content.innerHTML = `
     <div class="fixed inset-0 bg-black bg-opacity-50" id="dogModalOverlay"></div>
     <div class="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto z-10">
       <div class="relative">
-        <div class="h-48 sm:h-64 bg-gray-200 flex items-center justify-center">
-          ${chien.photo_url ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">` : '<span class="text-gray-400">Image</span>'}
+        <div class="h-48 sm:h-64 bg-gray-100 flex items-center justify-center">
+          ${imageHTML}
         </div>
-        <button id="closeModalBtn" class="absolute top-2 left-2 bg-white rounded-full p-2 shadow-lg">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+        <button id="closeModalBtn" class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
       
-      <div class="p-4">
+      <div class="p-6">
         <div class="flex justify-between items-center">
-          <h2 class="text-xl font-bold text-gray-800">${chien.nom}</h2>
-          <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColorClass}">
+          <h2 class="text-2xl font-bold text-gray-800">${chien.nom}</h2>
+          <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColorClass}">
             ${chien.statut}
           </span>
         </div>
@@ -1152,16 +1100,6 @@ function showDetailedEvaluation(chien) {
       console.error('Erreur lors de la vérification de l\'authentification:', error);
       showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
     }
-  });
-}
-    
-    // Afficher un formulaire de contact pour le propriétaire
-    showMessage('Cette fonctionnalité sera bientôt disponible.', 'info');
-  });
-  
-  document.getElementById('demanderEvaluationBtn')?.addEventListener('click', () => {
-    // Afficher un formulaire de demande d'évaluation
-    showMessage('Cette fonctionnalité sera bientôt disponible.', 'info');
   });
 }
 

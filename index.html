@@ -83,7 +83,7 @@
           <div class="hidden md:flex items-center space-x-6">
             <button class="font-medium text-basque-red" id="accueilBtn">Accueil</button>
             <button class="font-medium text-gray-600 hover:text-gray-900" id="chiensBtn">Chiens</button>
-            <button class="font-medium text-gray-600 hover:text-gray-900" id="eleveursBtn">Éleveurs</button>
+            <button class="font-medium text-gray-600 hover:text-gray-900" id="eleveursBtn">Adoptants</button>
             <button class="font-medium text-gray-600 hover:text-gray-900" id="evaluationBtn">Évaluation</button>
             <button class="font-medium text-gray-600 hover:text-gray-900" id="profilBtn">Mon Profil</button>
             <button class="font-medium text-gray-600 hover:text-gray-900 admin-btn hidden" id="adminBtn">Admin</button>
@@ -159,7 +159,7 @@
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                   <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                Éleveurs
+                Adoptants
               </button>
             </li>
             <li>
@@ -196,7 +196,7 @@
         Voir les chiens disponibles
       </button>
       <button id="voirEleveursBtn" class="px-4 py-2 bg-basque-green text-white rounded-lg font-medium hover:bg-basque-green-dark transition">
-        Recherche de compagnon
+        En recherche de compagnon
       </button>
     </div>
   </div>
@@ -321,19 +321,19 @@
       </div>
 
       <div id="eleveurs-content" class="hidden">
-        <h2 class="text-2xl font-bold text-gray-800">Éleveurs recherchant un chien</h2>
+        <h2 class="text-2xl font-bold text-gray-800">Personne recherchant un chien</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" id="eleveurs-container">
           <!-- Les éleveurs seront ajoutés ici -->
         </div>
         
         <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 class="text-lg font-bold text-gray-800">Vous êtes éleveur ?</h3>
+          <h3 class="text-lg font-bold text-gray-800">Vous êtes en recherche d'un compagnon ?</h3>
           <p class="mt-2 text-gray-700">
             Inscrivez-vous gratuitement pour publier votre recherche de chien de troupeau. 
             Notre service d'évaluation vous garantit un chien adapté à vos besoins.
           </p>
           <button id="inscrireEleveurBtn" class="mt-4 px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-            Inscription éleveur
+            Inscription adoptant
           </button>
         </div>
       </div>
@@ -586,14 +586,14 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                       </svg>
                     </div>
-                    <h4 class="ml-4 text-lg font-bold text-gray-800">Inscrire un élevage</h4>
+                    <h4 class="ml-4 text-lg font-bold text-gray-800">Inscrire une recherche</h4>
                   </div>
                   <p class="mt-3 text-gray-700">
                     Vous êtes berger, éleveur ou particulier à la recherche d'un chien de troupeau ? Inscrivez-vous pour décrire vos besoins et 
                     être mis en relation avec des chiens évalués.
                   </p>
                   <button id="inscriptionEleveurBtn" class="mt-4 w-full px-4 py-2 rounded-lg font-medium text-basque-green border border-basque-green hover:bg-green-50 transition">
-                    Inscrire un élevage
+                    Inscrire une recherche
                   </button>
                 </div>
               </div>
@@ -633,7 +633,7 @@
             <ul class="space-y-2">
               <li><button class="text-gray-400 hover:text-white" id="footerAccueilBtn">Accueil</button></li>
               <li><button class="text-gray-400 hover:text-white" id="footerChiensBtn">Chiens disponibles</button></li>
-              <li><button class="text-gray-400 hover:text-white" id="footerEleveursBtn">Éleveurs</button></li>
+              <li><button class="text-gray-400 hover:text-white" id="footerEleveursBtn">Adoptants</button></li>
               <li><button class="text-gray-400 hover:text-white" id="footerEvaluationBtn">Méthode d'évaluation</button></li>
               <li><button class="text-gray-400 hover:text-white" id="footerProfilBtn">Mon profil</button></li>
             </ul>

@@ -188,33 +188,105 @@
     <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="mainContent">
       <!-- Contenu principal ici -->
       <div id="accueil-content">
-        <div class="p-6 rounded-xl bg-gradient-to-r from-basque-red to-basque-red-dark text-black shadow-lg">
-          <h2 class="text-2xl font-bold">Bienvenue sur Berger Connect</h2>
-          <p class="mt-2">Votre plateforme de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes.</p>
-          <div class="mt-6 flex gap-4">
-            <button id="voirChiensBtn" class="px-4 py-2 bg-white text-basque-red rounded-lg font-medium hover:bg-gray-100 transition">
-              Voir les chiens disponibles
-            </button>
-            <button id="voirEleveursBtn" class="px-4 py-2 bg-basque-green text-white rounded-lg font-medium hover:bg-basque-green-dark transition">
-              Voir les éleveurs
-            </button>
+  <div class="p-6 rounded-xl bg-gradient-to-r from-basque-red to-basque-red-dark text-white shadow-lg">
+    <h2 class="text-2xl font-bold">Bienvenue sur Berger Connect</h2>
+    <p class="mt-2">Votre plateforme de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes.</p>
+    <div class="mt-6 flex flex-wrap gap-4">
+      <button id="voirChiensBtn" class="px-4 py-2 bg-basque-red text-white rounded-lg font-medium border border-white hover:bg-basque-red-dark transition">
+        Voir les chiens disponibles
+      </button>
+      <button id="voirEleveursBtn" class="px-4 py-2 bg-basque-green text-white rounded-lg font-medium hover:bg-basque-green-dark transition">
+        Recherche de compagnon
+      </button>
+    </div>
+  </div>
+  
+  <!-- Schéma explicatif du projet -->
+  <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Comment fonctionne Berger Connect ?</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
+      <!-- Étape 1 -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-basque-red text-white flex items-center justify-center text-2xl font-bold mb-4">1</div>
+        <h4 class="font-bold text-gray-800 mb-2">Inscription</h4>
+        <p class="text-gray-600">Les propriétaires de chiens et les personnes recherchant un compagnon s'inscrivent gratuitement sur la plateforme.</p>
+      </div>
+      
+      <!-- Étape 2 -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-basque-red text-white flex items-center justify-center text-2xl font-bold mb-4">2</div>
+        <h4 class="font-bold text-gray-800 mb-2">Évaluation professionnelle</h4>
+        <p class="text-gray-600">Nos experts évaluent chaque chien pour déterminer ses capacités et son caractère, garantissant des placements adaptés.</p>
+      </div>
+      
+      <!-- Étape 3 -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-basque-red text-white flex items-center justify-center text-2xl font-bold mb-4">3</div>
+        <h4 class="font-bold text-gray-800 mb-2">Mise en relation</h4>
+        <p class="text-gray-600">Nous facilitons la rencontre entre le chien et son futur maître pour assurer une parfaite compatibilité.</p>
+      </div>
+    </div>
+    
+    <!-- Infographic/Flowchart representation -->
+    <div class="mt-8 p-4 bg-basque-cream rounded-lg">
+      <div class="flex flex-col md:flex-row items-center justify-between relative">
+        <!-- Dog owners section -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4 md:mb-0 w-full md:w-1/4">
+          <div class="flex items-center justify-center mb-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D0202A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 9l7.5-5 7.5 5v8.5c0 .83-.67 1.5-1.5 1.5h-12c-.83 0-1.5-.67-1.5-1.5V9z"></path>
+              <path d="M16 3v4"></path>
+              <circle cx="8" cy="14" r="2"></circle>
+              <circle cx="16" cy="14" r="2"></circle>
+            </svg>
+            <h5 class="ml-2 font-bold text-gray-800">Propriétaires de chiens</h5>
           </div>
+          <p class="text-sm text-gray-600">Inscrivent leurs chiens pour un nouveau foyer adapté</p>
         </div>
         
-        <h3 class="text-xl font-bold text-gray-800 mt-8">Derniers chiens ajoutés</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4" id="chiens-container">
-          <!-- Les chiens seront ajoutés ici par JavaScript -->
+        <!-- Center evaluator -->
+        <div class="bg-basque-red text-white p-4 rounded-lg shadow-md mb-4 md:mb-0 w-full md:w-1/3 z-10">
+          <div class="flex items-center justify-center mb-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <h5 class="ml-2 font-bold">Berger Connect</h5>
+          </div>
+          <p class="text-sm">Évaluation professionnelle et mise en relation optimale</p>
         </div>
         
-        <!-- Section lien avec Artzainak -->
-        <div class="mt-8 p-6 rounded-xl bg-white shadow-lg border-l-4 border-basque-green">
-          <h3 class="text-xl font-bold text-gray-800">En partenariat avec Artzainak</h3>
-          <p class="mt-2 text-gray-700">
-            Berger Connect est associé à <strong>Artzainak</strong>, notre activité de cours de chien de troupeau et d'écopaturage pour particuliers. 
-            Découvrez nos services d'éducation canine spécialisée sur <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">Artzainak - Education chien de troupeau et écopaturage</a>.
-          </p>
+        <!-- New owner section -->
+        <div class="bg-white p-4 rounded-lg shadow-md w-full md:w-1/4">
+          <div class="flex items-center justify-center mb-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#278C45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <h5 class="ml-2 font-bold text-gray-800">Recherche de compagnon</h5>
+          </div>
+          <p class="text-sm text-gray-600">Trouvent un chien parfaitement adapté à leurs besoins</p>
+        </div>
+        
+        <!-- Connection arrows for desktop -->
+        <div class="hidden md:block absolute w-full h-0.5 bg-gray-300">
+          <!-- This is the connecting line -->
         </div>
       </div>
+    </div>
+  </div>
+  
+  <!-- Section lien avec Artzainak -->
+  <div class="mt-8 p-6 rounded-xl bg-white shadow-lg border-l-4 border-basque-green">
+    <h3 class="text-xl font-bold text-gray-800">En partenariat avec Artzainak</h3>
+    <p class="mt-2 text-gray-700">
+      Berger Connect est associé à <strong>Artzainak</strong>, notre activité de cours de chien de troupeau et d'écopaturage pour particuliers. 
+      Découvrez nos services d'éducation canine spécialisée sur <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">Artzainak - Education chien de troupeau et écopaturage</a>.
+    </p>
+  </div>
+</div>
 
       <div id="chiens-content" class="hidden">
         <div class="flex justify-between items-center">

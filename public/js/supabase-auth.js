@@ -608,7 +608,7 @@ function showUserSettings(user, userData) {
   });
 }
 
-// Fonction pour créer le formulaire d'élevage
+// Fonction pour créer le formulaire d'élevage - Version optimisée pour mobile
 function createEleveurForm() {
   const supabase = window.supabaseClient;
   if (!supabase) {
@@ -619,36 +619,36 @@ function createEleveurForm() {
   
   // Code du formulaire d'élevage
   const content = document.createElement('div');
-  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
   
   content.innerHTML = `
     <div class="fixed inset-0 bg-black bg-opacity-50" id="eleveurFormOverlay"></div>
-    <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full p-6 z-10 max-h-90vh overflow-auto">
-      <button id="closeEleveurFormBtn" class="absolute top-4 right-4">
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl p-4 z-10 max-h-[90vh] overflow-auto">
+      <button id="closeEleveurFormBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
       
-      <h3 class="text-xl font-bold text-gray-800">Décrire mon élevage</h3>
-      <p class="mt-2 text-gray-700">Complétez les informations sur votre élevage et vos besoins en chien de troupeau.</p>
+      <h3 class="text-xl font-bold text-gray-800 pr-8">Décrire mon élevage</h3>
+      <p class="mt-1 text-sm text-gray-700">Complétez les informations sur votre élevage et vos besoins en chien de troupeau.</p>
       
-      <form id="eleveurForm" class="mt-6 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form id="eleveurForm" class="mt-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700">Nom de l'élevage / exploitation</label>
-            <input type="text" id="eleveurName" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+            <input type="text" id="eleveurName" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Localisation</label>
-            <input type="text" id="eleveurLocation" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Ex: Hasparren" required>
+            <input type="text" id="eleveurLocation" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Ex: Hasparren" required>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Type de cheptel</label>
-            <select id="eleveurCheptel" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+            <select id="eleveurCheptel" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
               <option value="">Sélectionnez</option>
               <option value="Moutons">Moutons</option>
               <option value="Vaches">Vaches</option>
@@ -660,18 +660,20 @@ function createEleveurForm() {
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700">Description de l'élevage et besoins</label>
-            <textarea id="eleveurDescription" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Décrivez votre élevage, le nombre d'animaux, le terrain, et vos besoins spécifiques en chien de troupeau..." required></textarea>
+            <textarea id="eleveurDescription" rows="3" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Décrivez votre élevage, le nombre d'animaux, le terrain, et vos besoins spécifiques en chien de troupeau..." required></textarea>
           </div>
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700">Nom du contact</label>
-            <input type="text" id="eleveurContact" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
+            <input type="text" id="eleveurContact" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
           </div>
         </div>
         
-        <button type="submit" id="submitEleveurBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-          Enregistrer mon élevage
-        </button>
+        <div class="mt-4 flex justify-center">
+          <button type="submit" id="submitEleveurBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+            Enregistrer mon élevage
+          </button>
+        </div>
       </form>
     </div>
   `;
@@ -752,4 +754,5 @@ function createEleveurForm() {
       showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
     }
   });
+}
 }

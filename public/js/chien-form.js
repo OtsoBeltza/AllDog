@@ -18,6 +18,7 @@ async function createDogForm() {
       return;
     }
     
+    // Créer le formulaire en HTML
     const content = document.createElement('div');
     content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
     
@@ -80,19 +81,19 @@ async function createDogForm() {
             
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700">Photo du chien</label>
-              <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                <div class="space-y-1 text-center">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                  <div class="flex text-sm text-gray-600">
-                    <label for="dogPhoto" class="relative cursor-pointer bg-white rounded-md font-medium text-basque-red hover:text-basque-red-dark">
-                      <span>Télécharger une photo</span>
-                      <input id="dogPhoto" name="dogPhoto" type="file" class="sr-only" accept="image/*">
-                    </label>
-                    <p class="pl-1">ou glisser-déposer</p>
-                  </div>
-                  <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+              <div id="photoDropArea" class="mt-1 relative border-2 border-gray-300 border-dashed rounded-lg p-6 flex flex-col justify-center items-center">
+                <input type="file" id="dogPhoto" name="dogPhoto" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-600">Cliquez pour sélectionner ou déposez une image</p>
+                <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                
+                <div id="imagePreviewContainer" class="mt-4 hidden">
+                  <img id="imagePreview" src="#" alt="Aperçu" class="h-32 w-auto mx-auto rounded-lg">
+                  <button type="button" id="removePreview" class="mt-2 inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                    Supprimer
+                  </button>
                 </div>
               </div>
             </div>
@@ -134,267 +135,271 @@ async function createDogForm() {
       </div>
     `;
     
+    // Ajouter le formulaire au document
     document.body.appendChild(content);
     document.body.style.overflow = 'hidden';
     
-    // Gestionnaire d'événements pour fermer le formulaire
-    document.getElementById('closeDogFormBtn').addEventListener('click', () => {
-      document.body.removeChild(content);
-      document.body.style.overflow = '';
-    });
-    
-    document.getElementById('dogFormOverlay').addEventListener('click', () => {
-      document.body.removeChild(content);
-      document.body.style.overflow = '';
-    });
-    
-    // Gestionnaire pour le glisser-déposer des photos
-    const photoInput = document.getElementById('dogPhoto');
-    const dropArea = photoInput.closest('div.border');
-    
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, preventDefaults, false);
-    });
-    
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropArea.addEventListener(eventName, highlight, false);
-    });
-    
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, unhighlight, false);
-    });
-    
-    function highlight() {
-      dropArea.classList.add('border-basque-red', 'bg-red-50');
-    }
-    
-    function unhighlight() {
-      dropArea.classList.remove('border-basque-red', 'bg-red-50');
-    }
-    
-    dropArea.addEventListener('drop', handleDrop, false);
-    
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      photoInput.files = files;
+    // Attendre que le DOM soit mis à jour
+    setTimeout(() => {
+      // Gestionnaire pour fermer le formulaire
+      document.getElementById('closeDogFormBtn')?.addEventListener('click', () => {
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+      });
       
-      // Afficher un aperçu de l'image
-      displayImagePreview(files[0]);
-    }
-    
-    photoInput.addEventListener('change', function() {
-      if (this.files.length > 0) {
-        displayImagePreview(this.files[0]);
-      }
-    });
-    
-    // FONCTION MODIFIÉE : Ajout de logs et d'une meilleure gestion des erreurs
-    function displayImagePreview(file) {
-      if (!file.type.match('image.*')) {
-        showMessage('Veuillez sélectionner une image.', 'warning');
-        return;
-      }
+      document.getElementById('dogFormOverlay')?.addEventListener('click', () => {
+        document.body.removeChild(content);
+        document.body.style.overflow = '';
+      });
       
-      console.log("Prévisualisation de l'image:", file.name, "Taille:", Math.round(file.size/1024), "KB");
+      // Gestion de la prévisualisation d'image simplifiée
+      const photoInput = document.getElementById('dogPhoto');
+      const imagePreview = document.getElementById('imagePreview');
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      const removePreviewBtn = document.getElementById('removePreview');
+      const dropArea = document.getElementById('photoDropArea');
       
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const preview = document.createElement('div');
-        preview.className = 'mt-3';
-        preview.innerHTML = `
-          <div class="relative">
-            <img src="${e.target.result}" alt="Aperçu" class="h-32 w-auto mx-auto rounded-lg">
-            <button type="button" id="removePreview" class="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full p-1">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-        `;
+      if (photoInput && imagePreview && previewContainer && removePreviewBtn && dropArea) {
+        // Gestion des événements de glisser-déposer
+        ['dragenter', 'dragover'].forEach(event => {
+          dropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.add('border-basque-red', 'bg-red-50');
+          });
+        });
         
-        // Supprimer l'aperçu précédent s'il existe
-        const oldPreview = dropArea.querySelector('div.mt-3');
-        if (oldPreview) {
-          oldPreview.remove();
-        }
+        ['dragleave', 'drop'].forEach(event => {
+          dropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.remove('border-basque-red', 'bg-red-50');
+          });
+        });
         
-        dropArea.appendChild(preview);
+        // Gestion du dépôt de fichier
+        dropArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (e.dataTransfer.files.length) {
+            photoInput.files = e.dataTransfer.files;
+            updateImagePreview(photoInput.files[0]);
+          }
+        });
         
-        // Gestionnaire pour supprimer l'aperçu
-        document.getElementById('removePreview').addEventListener('click', () => {
-          preview.remove();
+        // Gestion du changement de fichier via le sélecteur
+        photoInput.addEventListener('change', () => {
+          if (photoInput.files.length) {
+            updateImagePreview(photoInput.files[0]);
+          }
+        });
+        
+        // Suppression de l'aperçu
+        removePreviewBtn.addEventListener('click', () => {
           photoInput.value = '';
+          previewContainer.classList.add('hidden');
+        });
+        
+        // Fonction pour mettre à jour l'aperçu
+        function updateImagePreview(file) {
+          if (!file || !file.type.match('image.*')) {
+            showMessage('Veuillez sélectionner une image valide.', 'warning');
+            return;
+          }
+          
+          console.log("Prévisualisation de l'image:", file.name, "Taille:", Math.round(file.size/1024), "KB");
+          
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.classList.remove('hidden');
+          };
+          
+          reader.onerror = (error) => {
+            console.error("Erreur lors de la lecture du fichier:", error);
+            showMessage('Erreur lors de la prévisualisation de l\'image.', 'error');
+          };
+          
+          reader.readAsDataURL(file);
+        }
+      } else {
+        console.error("Éléments manquants:", {
+          photoInput: !!photoInput,
+          imagePreview: !!imagePreview,
+          previewContainer: !!previewContainer,
+          removePreviewBtn: !!removePreviewBtn,
+          dropArea: !!dropArea
         });
       }
       
-      reader.onerror = function(error) {
-        console.error("Erreur lors de la lecture du fichier:", error);
-        showMessage('Erreur lors de la prévisualisation de l\'image.', 'error');
-      };
-      
-      reader.readAsDataURL(file);
-    }
-    
-    // NOUVELLE FONCTION : Extraction de la logique d'upload pour une meilleure lisibilité et gestion des erreurs
-    async function uploadDogPhoto(dogPhoto, supabase) {
-      // Si une photo a été téléchargée, la traiter
-      let photoUrl = null;
-      if (dogPhoto) {
-        try {
-          console.log("Début de l'upload de la photo:", dogPhoto.name);
+      // Gestion du formulaire
+      const form = document.getElementById('dogForm');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
           
-          // Vérifier que le bucket "photos" existe
-          const { data: buckets, error: bucketError } = await supabase
-            .storage
-            .listBuckets();
+          const dogName = document.getElementById('dogName')?.value;
+          const dogBreed = document.getElementById('dogBreed')?.value;
+          const dogAge = document.getElementById('dogAge')?.value;
+          const dogSex = document.getElementById('dogSex')?.value;
+          const dogLocation = document.getElementById('dogLocation')?.value;
+          const dogDescription = document.getElementById('dogDescription')?.value;
+          const ownerName = document.getElementById('ownerName')?.value;
+          const ownerPhone = document.getElementById('ownerPhone')?.value;
+          const ownerEmail = document.getElementById('ownerEmail')?.value;
+          const dogTerms = document.getElementById('dogTerms')?.checked;
+          const dogPhoto = document.getElementById('dogPhoto')?.files?.[0];
           
-          if (bucketError) {
-            console.error("Erreur lors de la vérification des buckets:", bucketError);
-            throw bucketError;
+          if (!dogName || !dogBreed || !dogAge || !dogSex || !dogLocation || !dogDescription || 
+              !ownerName || !ownerPhone || !ownerEmail || !dogTerms) {
+            showMessage('Veuillez remplir tous les champs obligatoires.', 'warning');
+            return;
           }
           
-          const photosBucketExists = buckets.some(bucket => bucket.name === 'photos');
-          if (!photosBucketExists) {
-            console.error("Le bucket 'photos' n'existe pas dans Supabase");
-            throw new Error("Le bucket 'photos' n'existe pas. Veuillez le créer dans votre projet Supabase.");
+          // Changer le bouton en indicateur de chargement
+          const submitBtn = document.getElementById('submitDogBtn');
+          if (submitBtn) {
+            submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+            submitBtn.disabled = true;
           }
           
-          // Créer un nom de fichier unique
-          const fileExt = dogPhoto.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          const filePath = `dogs/${fileName}`;
-          
-          console.log("Chemin du fichier pour l'upload:", filePath);
-          
-          // Uploader la photo vers le stockage Supabase
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('photos')
-            .upload(filePath, dogPhoto, {
-              cacheControl: '3600',
-              upsert: false
-            });
-          
-          if (uploadError) {
-            console.error("Erreur lors de l'upload:", uploadError);
-            throw uploadError;
-          }
-          
-          // Obtenir l'URL publique de la photo
-          const { data: urlData } = supabase.storage
-            .from('photos')
-            .getPublicUrl(filePath);
-          
-          console.log("URL obtenue pour la photo:", urlData);  
-          photoUrl = urlData.publicUrl;
-          console.log("URL finale de la photo:", photoUrl);
-        } catch (error) {
-          console.error("Erreur complète lors de l'upload de la photo:", error);
-          throw error;
-        }
-      }
-      
-      return photoUrl;
-    }
-    
-    // SOUMISSION DU FORMULAIRE MODIFIÉE
-    document.getElementById('dogForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const dogName = document.getElementById('dogName').value;
-      const dogBreed = document.getElementById('dogBreed').value;
-      const dogAge = document.getElementById('dogAge').value;
-      const dogSex = document.getElementById('dogSex').value;
-      const dogLocation = document.getElementById('dogLocation').value;
-      const dogDescription = document.getElementById('dogDescription').value;
-      const ownerName = document.getElementById('ownerName').value;
-      const ownerPhone = document.getElementById('ownerPhone').value;
-      const ownerEmail = document.getElementById('ownerEmail').value;
-      const dogTerms = document.getElementById('dogTerms').checked;
-      const dogPhoto = document.getElementById('dogPhoto').files[0];
-      
-      if (!dogName || !dogBreed || !dogAge || !dogSex || !dogLocation || !dogDescription || 
-          !ownerName || !ownerPhone || !ownerEmail || !dogTerms) {
-        showMessage('Veuillez remplir tous les champs obligatoires.', 'warning');
-        return;
-      }
-      
-      // Changer le bouton en indicateur de chargement
-      const submitBtn = document.getElementById('submitDogBtn');
-      submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-      submitBtn.disabled = true;
-      
-      try {
-        const supabase = window.supabaseClient;
-        if (!supabase) throw new Error("Supabase n'est pas initialisé");
-        
-        // Obtenir l'utilisateur actuel
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        // Préparer les données du chien
-        const dogData = {
-          nom: dogName,
-          race: dogBreed,
-          age: dogAge,
-          sexe: dogSex,
-          localisation: dogLocation,
-          description: dogDescription,
-          proprietaire_id: user.id,
-          statut: 'En attente',
-          evaluation: 'Non évalué'
-        };
-        
-        // Gérer l'upload de la photo
-        if (dogPhoto) {
           try {
-            const photoUrl = await uploadDogPhoto(dogPhoto, supabase);
+            // Upload de la photo si présente
+            let photoUrl = null;
+            if (dogPhoto) {
+              try {
+                photoUrl = await uploadDogPhoto(dogPhoto, supabase);
+              } catch (photoError) {
+                console.error("Erreur lors de l'upload de la photo:", photoError);
+                showMessage("Impossible d'uploader la photo, mais les informations du chien seront sauvegardées.", 'warning');
+              }
+            }
+            
+            // Création de l'objet chien
+            const dogData = {
+              nom: dogName,
+              race: dogBreed,
+              age: dogAge,
+              sexe: dogSex,
+              localisation: dogLocation,
+              description: dogDescription,
+              proprietaire_id: user.id,
+              statut: 'En attente',
+              evaluation: 'Non évalué'
+            };
+            
+            // Ajouter l'URL de la photo si disponible
             if (photoUrl) {
               dogData.photo_url = photoUrl;
             }
-          } catch (photoError) {
-            console.error("Erreur lors de l'upload de la photo:", photoError);
-            // On continue malgré l'erreur de photo, pour au moins sauvegarder les infos du chien
-            showMessage("Impossible d'uploader la photo, mais les informations du chien seront sauvegardées.", 'warning');
+            
+            // Insérer dans la base de données
+            const { data: dogInsertData, error: dogInsertError } = await supabase
+              .from('chiens')
+              .insert([dogData]);
+            
+            if (dogInsertError) {
+              console.error("Erreur détaillée lors de l'ajout du chien:", dogInsertError);
+              throw dogInsertError;
+            }
+            
+            // Fermer le formulaire et afficher un message de succès
+            document.body.removeChild(content);
+            document.body.style.overflow = '';
+            
+            showMessage('Votre chien a été ajouté avec succès. Notre équipe va vous contacter pour planifier l\'évaluation.', 'success');
+            
+            // Rafraîchir l'affichage des chiens
+            if (typeof fetchAndDisplayDogs === 'function') {
+              fetchAndDisplayDogs();
+            }
+          } catch (error) {
+            console.error("Erreur lors de l'ajout du chien:", error);
+            if (submitBtn) {
+              submitBtn.textContent = 'Soumettre mon chien';
+              submitBtn.disabled = false;
+            }
+            showMessage('Une erreur s\'est produite: ' + (error.message || 'Veuillez réessayer.'), 'error');
           }
-        }
-        
-        // Ajouter le chien à la base de données
-        const { data: dogInsertData, error: dogInsertError } = await supabase
-          .from('chiens')
-          .insert([dogData]);
-        
-        if (dogInsertError) {
-          console.error("Erreur détaillée lors de l'ajout du chien:", dogInsertError);
-          throw dogInsertError;
-        }
-        
-        // Fermer le formulaire et afficher un message de succès
-        document.body.removeChild(content);
-        document.body.style.overflow = '';
-        
-        showMessage('Votre chien a été ajouté avec succès. Notre équipe va vous contacter pour planifier l\'évaluation.', 'success');
-        
-        // Rafraîchir l'affichage des chiens
-        if (typeof fetchAndDisplayDogs === 'function') {
-          fetchAndDisplayDogs();
-        }
-        
-      } catch (error) {
-        console.error("Erreur lors de l'ajout du chien: ", error);
-        submitBtn.textContent = 'Soumettre mon chien';
-        submitBtn.disabled = false;
-        showMessage('Une erreur s\'est produite: ' + (error.message || 'Veuillez réessayer.'), 'error');
+        });
+      } else {
+        console.error("Formulaire non trouvé");
       }
-    });
+    }, 100); // Petit délai pour s'assurer que le DOM est mis à jour
   } catch (error) {
     console.error("Erreur lors de la vérification de l'authentification:", error);
     showMessage("Une erreur s'est produite. Veuillez réessayer.", "error");
+  }
+}
+
+// Fonction pour télécharger une photo vers Supabase
+async function uploadDogPhoto(dogPhoto, supabase) {
+  if (!dogPhoto) return null;
+  
+  try {
+    console.log("Début de l'upload de la photo:", dogPhoto.name);
+    
+    // Liste des buckets disponibles
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+    
+    if (bucketError) {
+      console.error("Erreur lors de la vérification des buckets:", bucketError);
+      throw bucketError;
+    }
+    
+    console.log("Buckets disponibles:", buckets.map(b => b.name).join(', '));
+    
+    // Vérifier si le bucket 'photos' existe
+    const photosBucketExists = buckets.some(bucket => bucket.name === 'photos');
+    if (!photosBucketExists) {
+      console.error("Le bucket 'photos' n'existe pas dans Supabase");
+      // Tenter de créer le bucket
+      try {
+        const { data, error } = await supabase.storage.createBucket('photos', {
+          public: true
+        });
+        if (error) throw error;
+        console.log("Bucket 'photos' créé avec succès");
+      } catch (createError) {
+        console.error("Impossible de créer le bucket 'photos':", createError);
+        throw new Error("Le bucket 'photos' n'existe pas et ne peut pas être créé.");
+      }
+    }
+    
+    // Créer un nom de fichier unique
+    const fileExt = dogPhoto.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const filePath = `${fileName}`; // Pas de sous-dossier pour simplifier
+    
+    console.log("Chemin du fichier pour l'upload:", filePath);
+    
+    // Tester avec un fichier très petit d'abord
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('photos')
+      .upload(filePath, dogPhoto, {
+        cacheControl: '3600',
+        upsert: true
+      });
+    
+    if (uploadError) {
+      console.error("Erreur lors de l'upload:", uploadError);
+      throw uploadError;
+    }
+    
+    console.log("Upload réussi:", uploadData);
+    
+    // Obtenir l'URL publique de la photo
+    const { data: urlData } = supabase.storage
+      .from('photos')
+      .getPublicUrl(filePath);
+    
+    console.log("URL obtenue pour la photo:", urlData);
+    const photoUrl = urlData.publicUrl;
+    console.log("URL finale de la photo:", photoUrl);
+    
+    return photoUrl;
+  } catch (error) {
+    console.error("Erreur complète lors de l'upload de la photo:", error);
+    throw error;
   }
 }
 

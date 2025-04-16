@@ -186,9 +186,9 @@ async function fetchAndDisplayEleveurs() {
       const message = document.createElement('div');
       message.className = 'col-span-full p-6 bg-white rounded-xl shadow-lg text-center';
       message.innerHTML = `
-        <p class="text-gray-700">Aucun éleveur n'a encore publié de recherche.</p>
+        <p class="text-gray-700">Aucun éleveur/berger n'a encore publié de recherche.</p>
         <button id="addEleveurBtn" class="mt-4 px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-          Ajouter un élevage
+          Ajouter une recherche
         </button>
       `;
       

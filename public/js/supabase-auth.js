@@ -210,6 +210,8 @@ if (typeof showMessage !== 'function') {
   };
 }
 
+// Mise à jour de la fonction updateUIForLoggedInUser pour ne montrer le bouton admin qu'à l'utilisateur admin
+
 // Mise à jour de l'interface pour un utilisateur connecté
 async function updateUIForLoggedInUser(user) {
   try {
@@ -257,6 +259,9 @@ async function updateUIForLoggedInUser(user) {
       oldUserProfile.remove();
     }
     
+    // Vérifier si l'utilisateur est l'administrateur (restriction stricte à pierocarlo@gmx.fr ou utilisateurs avec rôle admin)
+    const isUserAdmin = user.email === 'pierocarlo@gmx.fr' || userData.role === 'admin';
+    
     // Créer et afficher l'interface utilisateur
     const userProfileDiv = document.createElement('div');
     userProfileDiv.className = 'bg-white rounded-xl shadow-lg p-6 userProfile';
@@ -273,7 +278,7 @@ async function updateUIForLoggedInUser(user) {
              userData.type === 'proprietaire' ? 'Propriétaire de chien' :
              userData.type === 'refuge' ? 'Représentant de refuge' : 
              userData.type === 'admin' ? 'Administrateur' : 'Utilisateur'}
-             ${userData.role === 'admin' ? ' <span class="ml-1 px-1 py-0.5 bg-basque-red text-white rounded-full text-xs">Admin</span>' : ''}
+             ${isUserAdmin ? ' <span class="ml-1 px-1 py-0.5 bg-basque-red text-white rounded-full text-xs">Admin</span>' : ''}
           </p>
         </div>
       </div>
@@ -354,6 +359,21 @@ async function updateUIForLoggedInUser(user) {
               <p class="text-sm text-gray-600">Quitter votre session</p>
             </div>
           </button>
+          
+          <!-- Bouton d'administration uniquement pour l'admin -->
+          ${isUserAdmin ? `
+          <button id="userAdminBtn" class="p-4 border border-basque-red bg-red-50 rounded-lg flex items-center text-left">
+            <div class="w-10 h-10 rounded-full bg-basque-red flex items-center justify-center text-white">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h4 class="font-bold">Panel d'administration</h4>
+              <p class="text-sm text-gray-600">Gérer le site</p>
+            </div>
+          </button>
+          ` : ''}
         </div>
       </div>
     `;
@@ -426,40 +446,31 @@ async function updateUIForLoggedInUser(user) {
       });
     }
     
-    // Vérifier si l'utilisateur est administrateur et afficher le bouton d'admin
-    if (typeof isAdmin === 'function') {
-      isAdmin(user).then(adminStatus => {
-        if (adminStatus) {
-          // Afficher le bouton d'administration dans le menu
-          const adminBtn = document.getElementById('adminBtn');
-          if (adminBtn) {
-            adminBtn.classList.remove('hidden');
-            adminBtn.addEventListener('click', () => showAdminPanel());
-          }
-          
-          // Ajouter également un bouton d'administration dans le profil
-          const actionsGrid = userProfileDiv.querySelector('.grid');
-          if (actionsGrid) {
-            const adminButton = document.createElement('button');
-            adminButton.className = 'p-4 border border-gray-200 rounded-lg flex items-center text-left';
-            adminButton.innerHTML = `
-              <div class="w-10 h-10 rounded-full bg-basque-red flex items-center justify-center text-white">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <h4 class="font-bold">Panel d'administration</h4>
-                <p class="text-sm text-gray-600">Gérer le site</p>
-              </div>
-            `;
-            actionsGrid.appendChild(adminButton);
-            
-            // Ajouter le gestionnaire d'événement
-            adminButton.addEventListener('click', () => showAdminPanel());
-          }
+    // Ajouter le gestionnaire pour le bouton d'administration (uniquement pour l'admin)
+    const userAdminBtn = document.getElementById('userAdminBtn');
+    if (userAdminBtn && isUserAdmin) {
+      userAdminBtn.addEventListener('click', () => {
+        if (typeof showAdminPanel === 'function') {
+          showAdminPanel();
+        } else {
+          showMessage("La fonctionnalité d'administration n'est pas disponible actuellement.", "error");
         }
       });
+    }
+    
+    // Afficher ou cacher le bouton d'administration dans le menu principal
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+      if (isUserAdmin) {
+        adminBtn.classList.remove('hidden');
+        adminBtn.addEventListener('click', () => {
+          if (typeof showAdminPanel === 'function') {
+            showAdminPanel();
+          }
+        });
+      } else {
+        adminBtn.classList.add('hidden');
+      }
     }
     
   } catch (error) {

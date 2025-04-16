@@ -296,8 +296,8 @@ async function updateUIForLoggedInUser(user) {
               </svg>
             </div>
             <div class="ml-3">
-              <h4 class="font-bold">Décrire mon élevage</h4>
-              <p class="text-sm text-gray-600">Précisez votre besoin en chien de troupeau</p>
+              <h4 class="font-bold">Décrire ma recherche</h4>
+              <p class="text-sm text-gray-600">Complétez les informations sur votre situation et vos besoins en chien de troupeau.</p>
             </div>
           </button>
           
@@ -642,13 +642,13 @@ function createEleveurForm() {
         </svg>
       </button>
       
-      <h3 class="text-xl font-bold text-gray-800 pr-8">Décrire mon élevage</h3>
-      <p class="mt-1 text-sm text-gray-700">Complétez les informations sur votre élevage et vos besoins en chien de troupeau.</p>
+      <h3 class="text-xl font-bold text-gray-800 pr-8">Décrire ma recherche</h3>
+      <p class="mt-1 text-sm text-gray-700">Complétez les informations sur votre situation et vos besoins en chien de troupeau.</p>
       
       <form id="eleveurForm" class="mt-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700">Nom de l'élevage / exploitation</label>
+            <label class="block text-sm font-medium text-gray-700">Nom de l'adoptant</label>
             <input type="text" id="eleveurName" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" required>
           </div>
           
@@ -670,7 +670,7 @@ function createEleveurForm() {
           </div>
           
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700">Description de l'élevage et besoins</label>
+            <label class="block text-sm font-medium text-gray-700">Description de la recherche et besoins spécifiques</label>
             <textarea id="eleveurDescription" rows="3" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-green focus:border-transparent" placeholder="Décrivez votre élevage, le nombre d'animaux, le terrain, et vos besoins spécifiques en chien de troupeau..." required></textarea>
           </div>
           
@@ -682,7 +682,7 @@ function createEleveurForm() {
         
         <div class="mt-4 flex justify-center">
           <button type="submit" id="submitEleveurBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-            Enregistrer mon élevage
+            Enregistrer ma publication
           </button>
         </div>
       </form>
@@ -751,7 +751,7 @@ function createEleveurForm() {
       document.body.removeChild(content);
       document.body.style.overflow = '';
       
-      showMessage('Votre élevage a été enregistré avec succès.', 'success');
+      showMessage('Votre publication a été enregistré avec succès.', 'success');
       
       // Rafraîchir l'affichage des éleveurs si la fonction existe
       if (typeof fetchAndDisplayEleveurs === 'function') {
@@ -759,8 +759,8 @@ function createEleveurForm() {
       }
       
     } catch (error) {
-      console.error("Erreur lors de l'ajout de l'élevage:", error);
-      submitBtn.textContent = 'Enregistrer mon élevage';
+      console.error("Erreur lors de l'ajout de la recherche:", error);
+      submitBtn.textContent = 'Enregistrer ma recherche';
       submitBtn.disabled = false;
       showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
     }

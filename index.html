@@ -116,11 +116,11 @@
         <div class="p-4 border-b">
           <div class="flex justify-between items-center">
             <div class="flex items-center">
-  <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-basque-red">
-    <img src="public/images/berger-connect-logo.jpg" alt="Berger Connect" class="w-full h-full object-cover">
-  </div>
-  <span class="ml-2 font-bold text-gray-800">Berger Connect</span>
-  </div>
+              <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-basque-red">
+                <img src="public/images/berger-connect-logo.jpg" alt="Berger Connect" class="w-full h-full object-cover">
+              </div>
+              <span class="ml-2 font-bold text-gray-800">Berger Connect</span>
+            </div>
             <button id="menuCloseBtn">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -529,6 +529,11 @@
           </div>
         </div>
       </div>
+      
+      <!-- Ajout du contenu admin pour l'administrateur -->
+      <div id="admin-content" class="hidden">
+        <!-- Le contenu du panneau admin sera ajouté dynamiquement -->
+      </div>
     </main>
     
     <!-- Footer -->
@@ -537,11 +542,11 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div class="flex items-center">
-  <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-basque-red">
-    <img src="public/images/berger-connect-logo.jpg" alt="Berger Connect" class="w-full h-full object-cover">
-  </div>
-  <span class="ml-2 text-xl font-bold">Berger Connect</span>
-  </div>
+              <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-basque-red">
+                <img src="public/images/berger-connect-logo.jpg" alt="Berger Connect" class="w-full h-full object-cover">
+              </div>
+              <span class="ml-2 text-xl font-bold">Berger Connect</span>
+            </div>
             <p class="mt-4 text-gray-400">
               Service de mise en relation pour chiens de troupeau au Pays Basque, Béarn et Landes. 
               Évaluation professionnelle pour garantir le placement idéal.
@@ -704,6 +709,7 @@
       document.getElementById('eleveurs-content').classList.add('hidden');
       document.getElementById('evaluation-content').classList.add('hidden');
       document.getElementById('profil-content').classList.add('hidden');
+      document.getElementById('admin-content').classList.add('hidden');
       
       // Afficher le contenu sélectionné
       document.getElementById(`${tabName}-content`).classList.remove('hidden');
@@ -714,15 +720,20 @@
       document.getElementById('eleveursBtn').classList.remove('text-basque-red');
       document.getElementById('evaluationBtn').classList.remove('text-basque-red');
       document.getElementById('profilBtn').classList.remove('text-basque-red');
+      document.getElementById('adminBtn')?.classList.remove('text-basque-red');
       
       document.getElementById('accueilBtn').classList.add('text-gray-600');
       document.getElementById('chiensBtn').classList.add('text-gray-600');
       document.getElementById('eleveursBtn').classList.add('text-gray-600');
       document.getElementById('evaluationBtn').classList.add('text-gray-600');
       document.getElementById('profilBtn').classList.add('text-gray-600');
+      document.getElementById('adminBtn')?.classList.add('text-gray-600');
       
-      document.getElementById(`${tabName}Btn`).classList.remove('text-gray-600');
-      document.getElementById(`${tabName}Btn`).classList.add('text-basque-red');
+      const activeBtn = document.getElementById(`${tabName}Btn`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600');
+        activeBtn.classList.add('text-basque-red');
+      }
       
       // Remonter en haut de la page
       window.scrollTo(0, 0);
@@ -996,10 +1007,10 @@
             </div>
             
             <div class="mt-8 flex flex-col md:flex-row gap-4">
-              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition" id="contactProprietaireBtn">
                 Contacter le propriétaire
               </button>
-              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+              <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition" id="demanderEvaluationBtn">
                 Demander une évaluation gratuite
               </button>
             </div>
@@ -1051,27 +1062,117 @@
     // Démarrer l'application après le chargement du DOM
     document.addEventListener('DOMContentLoaded', init);
   </script>
-<!-- scripts Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-  // Initialiser Supabase globalement avant de charger les autres scripts
-  window.supabaseClient = supabase.createClient(
-    'https://stspcjmphbzpeaprooyw.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0c3Bjam1waGJ6cGVhcHJvb3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MzkzMTIsImV4cCI6MjA2MDIxNTMxMn0.G9CxewImR5Pmq5epH7gw_d_j3VFLbY3ZbCTheS9LtE4'
-  );
-  console.log("Supabase initialisé:", !!window.supabaseClient);
-</script>
+  
+  <!-- scripts Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Initialiser Supabase globalement avant de charger les autres scripts
+    window.supabaseClient = supabase.createClient(
+      'https://stspcjmphbzpeaprooyw.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0c3Bjam1waGJ6cGVhcHJvb3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MzkzMTIsImV4cCI6MjA2MDIxNTMxMn0.G9CxewImR5Pmq5epH7gw_d_j3VFLbY3ZbCTheS9LtE4'
+    );
+    console.log("Supabase initialisé:", !!window.supabaseClient);
+  </script>
 
-<!-- Scripts personnalisés -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Message pour indiquer que le DOM est chargé
-    console.log("DOM chargé, vous pouvez maintenant utiliser window.supabaseClient");
-  });
-</script>
-<script src="public/js/supabase-auth.js"></script>
-<script src="public/js/supabase-db.js"></script>
-<script src="public/js/chien-form.js"></script>
-<script src="public/js/admin.js"></script>
+  <!-- Fonction pour initialiser les nouvelles tables -->
+  <script>
+    // Fonction pour initialiser les tables nécessaires lors du premier chargement
+    async function initializeNewTables() {
+      const supabase = window.supabaseClient;
+      if (!supabase) {
+        console.error("Supabase n'est pas initialisé");
+        return;
+      }
+      
+      try {
+        // Vérifier si l'utilisateur est administrateur
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || user.email !== 'pierocarlo@gmx.fr') {
+          console.log("Initialisation des tables réservée à l'administrateur");
+          return;
+        }
+        
+        // Vérifie si les tables existent déjà
+        const { data: dogMessages, error: messagesError } = await supabase
+          .from('dog_messages')
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+          
+        if (messagesError && messagesError.code !== 'PGRST116') {
+          // Créer la table dog_messages si elle n'existe pas
+          console.log("Création de la table dog_messages...");
+          try {
+            await supabase.rpc('create_dog_messages_table');
+          } catch (error) {
+            console.warn("Impossible de créer la table dog_messages:", error);
+          }
+        }
+        
+        const { data: evalRequests, error: requestsError } = await supabase
+          .from('evaluation_requests')
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+          
+        if (requestsError && requestsError.code !== 'PGRST116') {
+          // Créer la table evaluation_requests si elle n'existe pas
+          console.log("Création de la table evaluation_requests...");
+          try {
+            await supabase.rpc('create_evaluation_requests_table');
+          } catch (error) {
+            console.warn("Impossible de créer la table evaluation_requests:", error);
+          }
+        }
+        
+        // Vérifier et ajouter les colonnes d'évaluation à chiens si nécessaire
+        try {
+          const { data: chienSample } = await supabase
+            .from('chiens')
+            .select('obedience')
+            .limit(1)
+            .maybeSingle();
+          
+          if (chienSample === null || typeof chienSample.obedience === 'undefined') {
+            console.log("Ajout des colonnes d'évaluation à la table chiens...");
+            try {
+              await supabase.rpc('add_evaluation_columns');
+            } catch (error) {
+              console.warn("Impossible d'ajouter les colonnes d'évaluation:", error);
+            }
+          }
+        } catch (error) {
+          console.warn("Erreur lors de la vérification des colonnes:", error);
+        }
+        
+        console.log("Initialisation des tables terminée");
+      } catch (error) {
+        console.error("Erreur d'initialisation des tables:", error);
+      }
+    }
+
+    // Appeler la fonction après le chargement de la page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Attendre que Supabase soit initialisé
+      if (window.supabaseClient) {
+        initializeNewTables();
+      } else {
+        console.warn("Supabase n'est pas disponible pour l'initialisation des tables");
+      }
+    });
+  </script>
+
+  <!-- Scripts personnalisés -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Message pour indiquer que le DOM est chargé
+      console.log("DOM chargé, vous pouvez maintenant utiliser window.supabaseClient");
+    });
+  </script>
+  <script src="public/js/supabase-auth.js"></script>
+  <script src="public/js/supabase-db.js"></script>
+  <script src="public/js/chien-form.js"></script>
+  <script src="public/js/admin.js"></script>
+  <script src="public/js/messages-admin.js"></script>
 </body>
 </html>

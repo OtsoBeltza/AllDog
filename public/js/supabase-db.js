@@ -405,10 +405,10 @@ function createDogCard(chien) {
   return div;
 }
 
-// Fonction pour afficher les détails d'un chien
+// Fonction optimisée pour afficher les détails d'un chien
 function showDogDetails(chien) {
   const content = document.createElement('div');
-  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
   
   // Définir différentes couleurs selon le statut
   let statusColorClass = '';
@@ -424,97 +424,97 @@ function showDogDetails(chien) {
   let evaluationContent = '';
   if (chien.evaluation === 'Non évalué') {
     evaluationContent = `
-      <div class="flex items-center text-yellow-700">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+      <div class="flex items-start text-yellow-700">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 mt-1">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
           <line x1="12" y1="9" x2="12" y2="13"></line>
           <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
-        <p>Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation gratuite.</p>
+        <p class="text-sm">Ce chien n'a pas encore été évalué. Contactez-nous pour planifier une évaluation gratuite.</p>
       </div>
     `;
   } else if (chien.evaluation === 'En cours') {
     evaluationContent = `
-      <div class="flex items-center text-blue-700">
-        <div class="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2"></div>
-        <p>L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
+      <div class="flex items-start text-blue-700">
+        <div class="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin mr-2 flex-shrink-0 mt-1"></div>
+        <p class="text-sm">L'évaluation de ce chien est en cours. Les résultats seront bientôt disponibles.</p>
       </div>
     `;
   } else {
     evaluationContent = `
-      <div class="flex items-center text-green-700">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+      <div class="flex items-start text-green-700">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 mt-1">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
-        <p>${chien.evaluation}</p>
+        <p class="text-sm">${chien.evaluation}</p>
       </div>
     `;
   }
   
   content.innerHTML = `
     <div class="fixed inset-0 bg-black bg-opacity-50" id="dogModalOverlay"></div>
-    <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-90vh overflow-auto z-10">
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto z-10">
       <div class="relative">
-        <div class="h-64 bg-gray-200 flex items-center justify-center">
+        <div class="h-48 sm:h-64 bg-gray-200 flex items-center justify-center">
           ${chien.photo_url ? `<img src="${chien.photo_url}" alt="${chien.nom}" class="w-full h-full object-cover">` : '<span class="text-gray-400">Image</span>'}
         </div>
-        <button id="closeModalBtn" class="absolute top-4 left-4 bg-white rounded-full p-2 shadow-lg">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+        <button id="closeModalBtn" class="absolute top-2 left-2 bg-white rounded-full p-2 shadow-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
       
-      <div class="p-6">
+      <div class="p-4">
         <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-bold text-gray-800">${chien.nom}</h2>
-          <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColorClass}">
+          <h2 class="text-xl font-bold text-gray-800">${chien.nom}</h2>
+          <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColorClass}">
             ${chien.statut}
           </span>
         </div>
         
-        <div class="mt-4 grid grid-cols-2 gap-4">
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div class="text-gray-700">
-            <span class="text-sm font-medium">Race</span>
-            <p>${chien.race}</p>
+            <span class="text-xs font-medium">Race</span>
+            <p class="text-sm">${chien.race}</p>
           </div>
           <div class="text-gray-700">
-            <span class="text-sm font-medium">Âge</span>
-            <p>${chien.age}</p>
+            <span class="text-xs font-medium">Âge</span>
+            <p class="text-sm">${chien.age}</p>
           </div>
           <div class="text-gray-700">
-            <span class="text-sm font-medium">Sexe</span>
-            <p>${chien.sexe}</p>
+            <span class="text-xs font-medium">Sexe</span>
+            <p class="text-sm">${chien.sexe}</p>
           </div>
           <div class="text-gray-700">
-            <span class="text-sm font-medium">Localisation</span>
-            <p>${chien.localisation}</p>
+            <span class="text-xs font-medium">Localisation</span>
+            <p class="text-sm">${chien.localisation}</p>
           </div>
         </div>
         
-        <div class="mt-6">
-          <h3 class="text-lg font-medium text-gray-800">Évaluation</h3>
-          <div class="mt-2 p-4 rounded-lg bg-gray-50">
+        <div class="mt-4">
+          <h3 class="text-base font-medium text-gray-800">Évaluation</h3>
+          <div class="mt-1 p-3 rounded-lg bg-gray-50">
             ${evaluationContent}
           </div>
         </div>
         
-        <div class="mt-6 p-4 bg-basque-cream rounded-lg border-l-4 border-basque-green">
-          <h4 class="text-lg font-bold text-basque-green">Service en partenariat avec Artzainak</h4>
-          <p class="mt-2 text-gray-700">
+        <div class="mt-4 p-3 bg-basque-cream rounded-lg border-l-4 border-basque-green">
+          <h4 class="text-sm font-bold text-basque-green">Service en partenariat avec Artzainak</h4>
+          <p class="mt-1 text-xs text-gray-700">
             Cette évaluation est réalisée par notre équipe professionnelle en partenariat avec 
             <a href="https://artzainak.netlify.app" class="text-basque-green hover:underline" target="_blank">Artzainak</a>, 
             spécialiste en éducation canine pour chiens de troupeau.
           </p>
         </div>
         
-        <div class="mt-8 flex flex-col md:flex-row gap-4">
-          <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition" id="contactProprietaireBtn">
+        <div class="mt-4 flex flex-col sm:flex-row gap-2">
+          <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition text-sm w-full sm:w-auto" id="contactProprietaireBtn">
             Contacter le propriétaire
           </button>
-          <button class="px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition" id="demanderEvaluationBtn">
-            Demander une évaluation gratuite
+          <button class="px-3 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition text-sm w-full sm:w-auto" id="demanderEvaluationBtn">
+            Demander une évaluation
           </button>
         </div>
       </div>
@@ -556,13 +556,11 @@ function showDogDetails(chien) {
     }
     
     // Afficher un formulaire de contact pour le propriétaire
-    // Vous devrez implémenter cette fonction
     showMessage('Cette fonctionnalité sera bientôt disponible.', 'info');
   });
   
   document.getElementById('demanderEvaluationBtn')?.addEventListener('click', () => {
     // Afficher un formulaire de demande d'évaluation
-    // Vous devrez implémenter cette fonction
     showMessage('Cette fonctionnalité sera bientôt disponible.', 'info');
   });
 }

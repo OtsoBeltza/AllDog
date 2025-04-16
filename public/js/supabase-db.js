@@ -234,40 +234,43 @@ async function initializeDatabase() {
   }
 }
 
-// Afficher le formulaire de contact pour un éleveur
+// Fonction optimisée pour afficher le formulaire de contact pour un éleveur
 function showContactForm(eleveur) {
   const content = document.createElement('div');
-  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0';
+  content.className = 'fixed inset-0 z-50 flex items-center justify-center p-2';
   
   content.innerHTML = `
     <div class="fixed inset-0 bg-black bg-opacity-50" id="contactModalOverlay"></div>
-    <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6 z-10">
-      <button id="closeContactModalBtn" class="absolute top-4 right-4">
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-4 z-10 max-h-[90vh] overflow-auto">
+      <button id="closeContactModalBtn" class="absolute top-2 right-2 p-1 bg-gray-100 rounded-full">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
       
-      <h3 class="text-xl font-bold text-gray-800">Contacter ${eleveur.nom}</h3>
-      <p class="mt-2 text-gray-700">Votre message sera envoyé à ${eleveur.contact}.</p>
+      <h3 class="text-xl font-bold text-gray-800 pr-8">Contacter ${eleveur.nom}</h3>
+      <p class="mt-1 text-sm text-gray-700">Votre message sera envoyé à ${eleveur.contact}.</p>
       
-      <form id="contactForm" class="mt-6 space-y-4">
+      <form id="contactForm" class="mt-4 space-y-3">
         <div>
           <label class="block text-sm font-medium text-gray-700">Sujet</label>
-          <input type="text" id="contactSubject" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Demande d'information sur votre recherche de chien">
+          <input type="text" id="contactSubject" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Demande d'information sur votre recherche de chien" required>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Message</label>
-          <textarea id="contactMessage" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre message ici..."></textarea>
+          <textarea id="contactMessage" rows="3" class="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre message ici..." required></textarea>
         </div>
         <div class="flex items-center">
           <input type="checkbox" id="contactCopy" class="h-4 w-4 text-basque-red focus:ring-basque-red border-gray-300 rounded">
           <label for="contactCopy" class="ml-2 block text-sm text-gray-700">Recevoir une copie de ce message</label>
         </div>
-        <button type="submit" id="sendContactBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-          Envoyer le message
-        </button>
+        
+        <div class="mt-4 flex justify-center">
+          <button type="submit" id="sendContactBtn" class="w-full sm:w-auto px-6 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+            Envoyer le message
+          </button>
+        </div>
       </form>
     </div>
   `;

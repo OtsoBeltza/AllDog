@@ -263,16 +263,19 @@ async function createDogForm() {
           }
           
           try {
-            // Upload de la photo si présente
-            let photoUrl = null;
-            if (dogPhoto) {
-              try {
-                photoUrl = await uploadDogPhoto(dogPhoto, supabase);
-              } catch (photoError) {
-                console.error("Erreur lors de l'upload de la photo:", photoError);
-                showMessage("Impossible d'uploader la photo, mais les informations du chien seront sauvegardées.", 'warning');
-              }
-            }
+// Upload de la photo si présente
+let photoUrl = null;
+if (dogPhoto) {
+  try {
+    photoUrl = await uploadDogPhoto(dogPhoto, supabase);
+    if (!photoUrl) {
+      showMessage("La photo n'a pas pu être téléchargée, mais les informations du chien seront sauvegardées.", 'warning');
+    }
+  } catch (photoError) {
+    console.error("Erreur lors de l'upload de la photo:", photoError);
+    showMessage("Impossible d'uploader la photo, mais les informations du chien seront sauvegardées.", 'warning');
+  }
+}
             
             // Création de l'objet chien
             const dogData = {
@@ -331,7 +334,6 @@ async function createDogForm() {
   }
 }
 
-// Fonction pour télécharger une photo vers Supabase
 // Fonction pour télécharger une photo vers Supabase
 async function uploadDogPhoto(dogPhoto, supabase) {
   if (!dogPhoto) return null;

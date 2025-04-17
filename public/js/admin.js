@@ -11,7 +11,271 @@ async function isAdmin(user) {
   if (!supabase) return false;
   
   // Vérifier dans la table profiles si l'utilisateur a le rôle "admin"
-  const { data, error } = await supabase
+  const { data, error }
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Calme' : 
+                    value === 3 ? 'Modérée' : 
+                    value === 5 ? 'Très actif' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
+          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Recommandations pour le placement</label>
+          <textarea id="dogRecommendations" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Type d'élevage recommandé, expérience requise de l'éleveur...">${dog.recommendations || ''}</textarea>
+        </div>
+        
+        <button type="submit" id="submitEvaluationBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+          Enregistrer l'évaluation
+        </button>
+      </form>
+    </div>
+    `;
+  
+  document.body.appendChild(content);
+  document.body.style.overflow = 'hidden';
+  
+  // Ajouter du style pour la sélection des notes
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    input[type="radio"][name="dogObedience"]:checked + span,
+    input[type="radio"][name="dogInstinct"]:checked + span,
+    input[type="radio"][name="dogSociability"]:checked + span,
+    input[type="radio"][name="dogEnergy"]:checked + span {
+      background-color: #D0202A;
+      color: white;
+    }
+    
+    input[type="radio"] + span:hover {
+      background-color: #e0e0e0;
+    }
+  `;
+  document.head.appendChild(styleElement);
+  
+  // Gestionnaire d'événements pour fermer le formulaire
+  document.getElementById('closeEvaluationBtn').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+    document.head.removeChild(styleElement);
+  });
+  
+  document.getElementById('evaluationOverlay').addEventListener('click', () => {
+    document.body.removeChild(content);
+    document.body.style.overflow = '';
+    document.head.removeChild(styleElement);
+  });
+  
+  // Gestionnaires pour les boutons de notation
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      // Réinitialiser tous les boutons du même groupe
+      const name = e.target.name;
+      document.querySelectorAll(`input[name="${name}"] + span`).forEach(span => {
+        span.classList.remove('bg-basque-red', 'text-white');
+        span.classList.add('bg-gray-200');
+      });
+      
+      // Mettre en évidence le bouton sélectionné
+      const selectedSpan = e.target.nextElementSibling;
+      selectedSpan.classList.remove('bg-gray-200');
+      selectedSpan.classList.add('bg-basque-red', 'text-white');
+    });
+  });
+  
+  // Soumission du formulaire
+  document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const status = document.getElementById('dogStatus').value;
+    const evaluation = document.getElementById('dogEvaluation').value;
+    const obedience = document.querySelector('input[name="dogObedience"]:checked')?.value || 3;
+    const instinct = document.querySelector('input[name="dogInstinct"]:checked')?.value || 3;
+    const sociability = document.querySelector('input[name="dogSociability"]:checked')?.value || 3;
+    const energy = document.querySelector('input[name="dogEnergy"]:checked')?.value || 3;
+    const recommendations = document.getElementById('dogRecommendations').value;
+    
+    // Valider les données
+    if (status === 'Évalué' && !evaluation) {
+      showMessage('Veuillez fournir une évaluation pour ce chien.', 'warning');
+      return;
+    }
+    
+    // Changer le bouton en indicateur de chargement
+    const submitBtn = document.getElementById('submitEvaluationBtn');
+    submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+    submitBtn.disabled = true;
+    
+    try {
+      const supabase = window.supabaseClient;
+      if (!supabase) throw new Error("Supabase n'est pas initialisé");
+      
+      // Préparer les données de mise à jour
+      const updateData = {
+        statut: status,
+        evaluation: status === 'Évalué' ? evaluation : (status === 'En évaluation' ? 'En cours' : 'Non évalué'),
+        obedience: parseInt(obedience),
+        instinct: parseInt(instinct),
+        sociability: parseInt(sociability),
+        energy: parseInt(energy),
+        recommendations
+      };
+      
+      // Mettre à jour le chien dans la base de données
+      const { error } = await supabase
+        .from('chiens')
+        .update(updateData)
+        .eq('id', dog.id);
+      
+      if (error) throw error;
+      
+      // Fermer le formulaire et afficher un message de succès
+      document.body.removeChild(content);
+      document.body.style.overflow = '';
+      document.head.removeChild(styleElement);
+      
+      showMessage('L\'évaluation du chien a été enregistrée avec succès.', 'success');
+      
+      // Rafraîchir les données du panneau admin
+      const adminContent = document.getElementById('admin-content');
+      if (adminContent) {
+        loadAdminData(adminContent);
+      }
+      
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de l'évaluation:", error);
+      submitBtn.textContent = 'Enregistrer l\'évaluation';
+      submitBtn.disabled = false;
+      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
+    }
+  });
+}
+
+// Ajouter la fonction pour gérer la suppression d'un chien
+async function confirmDeleteDog(dog, container) {
+  // Créer une modale de confirmation
+  const confirmModal = document.createElement('div');
+  confirmModal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+  confirmModal.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="confirmOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmation de suppression</h3>
+      <p class="text-gray-700">Êtes-vous sûr de vouloir supprimer définitivement le chien <strong>${dog.nom}</strong> ?</p>
+      <p class="mt-2 text-sm text-red-600">Cette action est irréversible et supprimera toutes les données associées.</p>
+      
+      <div class="mt-6 flex justify-end space-x-4">
+        <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 transition">
+          Annuler
+        </button>
+        <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(confirmModal);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaires d'événements pour les boutons
+  document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+    document.body.removeChild(confirmModal);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('confirmOverlay').addEventListener('click', () => {
+    document.body.removeChild(confirmModal);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    const supabase = window.supabaseClient;
+    if (!supabase) {
+      showMessage("Erreur de connexion au service", "error");
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      return;
+    }
+    
+    try {
+      // Changer le bouton en indicateur de chargement
+      const confirmBtn = document.getElementById('confirmDeleteBtn');
+      confirmBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      confirmBtn.disabled = true;
+      
+      // Supprimer d'abord les messages associés au chien
+      await supabase
+        .from('dog_messages')
+        .delete()
+        .eq('chien_id', dog.id);
+      
+      // Supprimer les demandes d'évaluation associées
+      await supabase
+        .from('evaluation_requests')
+        .delete()
+        .eq('chien_id', dog.id);
+      
+      // Supprimer la photo du chien si elle existe
+      if (dog.photo_url) {
+        try {
+          // Extraire le nom du fichier de l'URL
+          const fileName = dog.photo_url.split('/').pop();
+          if (fileName) {
+            await supabase.storage
+              .from('photos')
+              .remove([fileName]);
+          }
+        } catch (photoError) {
+          console.error("Erreur lors de la suppression de la photo:", photoError);
+          // Continuer malgré l'erreur
+        }
+      }
+      
+      // Enfin, supprimer le chien
+      const { error } = await supabase
+        .from('chiens')
+        .delete()
+        .eq('id', dog.id);
+      
+      if (error) throw error;
+      
+      // Fermer la modale
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      
+      // Afficher un message de succès
+      showMessage(`Le chien ${dog.nom} a été supprimé avec succès.`, 'success');
+      
+      // Recharger les données d'administration
+      loadAdminData(container);
+      
+    } catch (error) {
+      console.error("Erreur lors de la suppression du chien:", error);
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      showMessage(`Erreur lors de la suppression: ${error.message}`, 'error');
+    }
+  });
+}
+
+ = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -156,6 +420,7 @@ async function loadAdminData(container) {
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button class="text-basque-red hover:text-basque-red-dark view-dog-btn" data-id="${chien.id}">Voir</button>
                     <button class="ml-3 text-basque-green hover:text-basque-green-dark evaluate-dog-btn" data-id="${chien.id}">Évaluer</button>
+                    <button class="ml-3 text-red-600 hover:text-red-800 delete-dog-btn" data-id="${chien.id}">Supprimer</button>
                   </td>
                 </tr>
               `).join('')}
@@ -290,6 +555,15 @@ async function loadAdminData(container) {
         const dogId = btn.getAttribute('data-id');
         const dog = chiens.find(c => c.id == dogId);
         if (dog) showDogEvaluationForm(dog);
+      });
+    });
+    
+    // Nouveau gestionnaire pour les boutons de suppression
+    document.querySelectorAll('.delete-dog-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dogId = btn.getAttribute('data-id');
+        const dog = chiens.find(c => c.id == dogId);
+        if (dog) confirmDeleteDog(dog, container);
       });
     });
     
@@ -508,217 +782,3 @@ function showDogEvaluationForm(dog) {
               `).join('')}
             </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
-            <div class="flex items-center mt-1">
-              ${[1, 2, 3, 4, 5].map(value => `
-                <label class="mx-2 flex flex-col items-center">
-                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
-                    ${value}
-                  </span>
-                  <span class="text-xs mt-1">${
-                    value === 1 ? 'Calme' : 
-                    value === 3 ? 'Modérée' : 
-                    value === 5 ? 'Très actif' : ''
-                  }</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
-          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Recommandations pour le placement</label>
-          <textarea id="dogRecommendations" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Type d'élevage recommandé, expérience requise de l'éleveur...">${dog.recommendations || ''}</textarea>
-        </div>
-        
-        <button type="submit" id="submitEvaluationBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-          Enregistrer l'évaluation
-        </button>
-      </form>
-    </div>
-  `;
-  
-  document.body.appendChild(content);
-  document.body.style.overflow = 'hidden';
-  
-  // Ajouter du style pour la sélection des notes
-  const styleElement = document.createElement('style');
-  styleElement.textContent = `
-    input[type="radio"][name="dogObedience"]:checked + span,
-    input[type="radio"][name="dogInstinct"]:checked + span,
-    input[type="radio"][name="dogSociability"]:checked + span,
-    input[type="radio"][name="dogEnergy"]:checked + span {
-      background-color: #D0202A;
-      color: white;
-    }
-    
-    input[type="radio"] + span:hover {
-      background-color: #e0e0e0;
-    }
-  `;
-  document.head.appendChild(styleElement);
-  
-  // Gestionnaire d'événements pour fermer le formulaire
-  document.getElementById('closeEvaluationBtn').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-    document.head.removeChild(styleElement);
-  });
-  
-  document.getElementById('evaluationOverlay').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-    document.head.removeChild(styleElement);
-  });
-  
-  // Gestionnaires pour les boutons de notation
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      // Réinitialiser tous les boutons du même groupe
-      const name = e.target.name;
-      document.querySelectorAll(`input[name="${name}"] + span`).forEach(span => {
-        span.classList.remove('bg-basque-red', 'text-white');
-        span.classList.add('bg-gray-200');
-      });
-      
-      // Mettre en évidence le bouton sélectionné
-      const selectedSpan = e.target.nextElementSibling;
-      selectedSpan.classList.remove('bg-gray-200');
-      selectedSpan.classList.add('bg-basque-red', 'text-white');
-    });
-  });
-  
-  // Soumission du formulaire
-  document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const status = document.getElementById('dogStatus').value;
-    const evaluation = document.getElementById('dogEvaluation').value;
-    const obedience = document.querySelector('input[name="dogObedience"]:checked')?.value || 3;
-    const instinct = document.querySelector('input[name="dogInstinct"]:checked')?.value || 3;
-    const sociability = document.querySelector('input[name="dogSociability"]:checked')?.value || 3;
-    const energy = document.querySelector('input[name="dogEnergy"]:checked')?.value || 3;
-    const recommendations = document.getElementById('dogRecommendations').value;
-    
-    // Valider les données
-    if (status === 'Évalué' && !evaluation) {
-      showMessage('Veuillez fournir une évaluation pour ce chien.', 'warning');
-      return;
-    }
-    
-    // Changer le bouton en indicateur de chargement
-    const submitBtn = document.getElementById('submitEvaluationBtn');
-    submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-    submitBtn.disabled = true;
-    
-    try {
-      const supabase = window.supabaseClient;
-      if (!supabase) throw new Error("Supabase n'est pas initialisé");
-      
-      // Préparer les données de mise à jour
-      const updateData = {
-        statut: status,
-        evaluation: status === 'Évalué' ? evaluation : (status === 'En évaluation' ? 'En cours' : 'Non évalué'),
-        obedience: parseInt(obedience),
-        instinct: parseInt(instinct),
-        sociability: parseInt(sociability),
-        energy: parseInt(energy),
-        recommendations
-      };
-      
-      // Mettre à jour le chien dans la base de données
-      const { error } = await supabase
-        .from('chiens')
-        .update(updateData)
-        .eq('id', dog.id);
-      
-      if (error) throw error;
-      
-      // Fermer le formulaire et afficher un message de succès
-      document.body.removeChild(content);
-      document.body.style.overflow = '';
-      document.head.removeChild(styleElement);
-      
-      showMessage('L\'évaluation du chien a été enregistrée avec succès.', 'success');
-      
-      // Rafraîchir les données du panneau admin
-      const adminContent = document.getElementById('admin-content');
-      if (adminContent) {
-        loadAdminData(adminContent);
-      }
-      
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement de l'évaluation:", error);
-      submitBtn.textContent = 'Enregistrer l\'évaluation';
-      submitBtn.disabled = false;
-      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
-    }
-  });
-}
-
-// Fonction pour créer un compte administrateur si nécessaire
-// ATTENTION: Dans une application réelle, ne jamais coder les identifiants en dur comme ceci.
-// Utilisez plutôt une invitation sécurisée ou un processus administratif.
-async function setupAdminAccount() {
-  const supabase = window.supabaseClient;
-  if (!supabase) return;
-  
-  // Vérifier si le compte admin existe déjà
-  const { data: existingUsers, error: searchError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'admin');
-    
-  if (searchError) {
-    console.error("Erreur lors de la recherche d'administrateurs:", searchError);
-    return;
-  }
-  
-  // Si aucun admin n'existe, créer le compte
-  if (!existingUsers || existingUsers.length === 0) {
-    try {
-      // Créer l'utilisateur admin
-      const { data, error } = await supabase.auth.signUp({
-        email: 'pierocarlo@gmx.fr',
-        password: 'aslaugaruda',
-        options: {
-          data: {
-            name: 'Pierocarlo',
-            type: 'admin'
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      // Ajouter le profil avec le rôle admin
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            name: 'Pierocarlo',
-            type: 'admin',
-            role: 'admin'
-          }
-        ]);
-        
-      if (profileError) throw profileError;
-      
-      console.log('Compte administrateur créé avec succès.');
-    } catch (error) {
-      console.error("Erreur lors de la création du compte administrateur:", error);
-    }
-  }
-}
-
-// Appel de la fonction au chargement de la page
-document.addEventListener('DOMContentLoaded', setupAdminAccount);

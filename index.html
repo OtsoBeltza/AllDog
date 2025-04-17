@@ -288,37 +288,39 @@
   </div>
 </div>
 
-      <div id="chiens-content" class="hidden">
-        <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-bold text-gray-800">Chiens disponibles</h2>
-          <button id="filterBtn" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Filtrer
-          </button>
-        </div>
-        
-        <div id="filter-panel" class="hidden mt-4 bg-white rounded-xl shadow-lg p-4">
-          <!-- Contenu du filtre -->
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="all-chiens-container">
-          <!-- Tous les chiens seront ajoutés ici -->
-        </div>
-        
-        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 class="text-xl font-bold text-gray-800">Vous avez un chien à placer ?</h3>
-          <p class="mt-2 text-gray-700">
-            Si vous êtes propriétaire d'un chien de troupeau que vous ne pouvez plus garder, ou si vous représentez un refuge, 
-            vous pouvez soumettre votre chien à notre service d'évaluation avant placement.
-          </p>
-          <button id="inscrireChienBtn" class="mt-4 px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
-            Inscrire un chien
-          </button>
-        </div>
-      </div>
+      <!-- Correction pour la div id="chiens-content" -->
+<div id="chiens-content" class="hidden">
+  <div class="flex justify-between items-center">
+    <h2 class="text-2xl font-bold text-gray-800">Chiens disponibles</h2>
+    <button id="filterBtn" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      Filtrer
+    </button>
+  </div>
+  
+  <div id="filter-panel" class="hidden mt-4 bg-white rounded-xl shadow-lg p-4">
+    <!-- Contenu du filtre -->
+  </div>
+  
+  <!-- Ajout des conteneurs requis par le script -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="all-chiens-container">
+    <!-- Tous les chiens seront ajoutés ici -->
+  </div>
+  
+  <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-xl font-bold text-gray-800">Vous avez un chien à placer ?</h3>
+    <p class="mt-2 text-gray-700">
+      Si vous êtes propriétaire d'un chien de troupeau que vous ne pouvez plus garder, ou si vous représentez un refuge, 
+      vous pouvez soumettre votre chien à notre service d'évaluation avant placement.
+    </p>
+    <button id="inscrireChienBtn" class="mt-4 px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+      Inscrire un chien
+    </button>
+  </div>
+</div>
 
       <!-- Remplacement du contenu de la div id="eleveurs-content" -->
 <div id="eleveurs-content" class="hidden">

@@ -11,7 +11,7 @@ async function isAdmin(user) {
   if (!supabase) return false;
   
   // Vérifier dans la table profiles si l'utilisateur a le rôle "admin"
-  const { data, error }
+  const { data, error } = await supabase
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>

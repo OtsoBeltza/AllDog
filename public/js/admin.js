@@ -12,43 +12,240 @@ async function isAdmin(user) {
   
   // Vérifier dans la table profiles si l'utilisateur a le rôle "admin"
   const { data, error } = await supabase
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
-            <div class="flex items-center mt-1">
-              ${[1, 2, 3, 4, 5].map(value => `
-                <label class="mx-2 flex flex-col items-center">
-                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
-                    ${value}
-                  </span>
-                  <span class="text-xs mt-1">${
-                    value === 1 ? 'Calme' : 
-                    value === 3 ? 'Modérée' : 
-                    value === 5 ? 'Très actif' : ''
-                  }</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        </div>
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+    
+  if (error || !data) return false;
+  
+  return data.role === 'admin';
+}
+
+// Fonction pour afficher l'interface d'administration
+async function showAdminPanel() {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    showMessage("Erreur de connexion au service", "error");
+    return;
+  }
+  
+  // Vérifier si l'utilisateur est connecté et admin
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    showMessage('Vous devez être connecté pour accéder à cette page.', 'warning');
+    showTab('profil');
+    return;
+  }
+  
+  // Vérifier strictement si l'utilisateur est l'admin pierocarlo@gmx.fr ou a le rôle admin
+  const adminStatus = await isAdmin(user);
+  if (!adminStatus) {
+    showMessage('Vous n\'avez pas les autorisations nécessaires pour accéder à cette page.', 'error');
+    showTab('accueil');
+    return;
+  }
+  
+  // Créer l'interface d'administration
+  // Cacher tous les contenus existants
+  document.querySelectorAll('#mainContent > div').forEach(div => {
+    div.classList.add('hidden');
+  });
+}
+
+// Fonction pour créer un compte administrateur si nécessaire
+// ATTENTION: Dans une application réelle, ne jamais coder les identifiants en dur comme ceci.
+// Utilisez plutôt une invitation sécurisée ou un processus administratif.
+async function setupAdminAccount() {
+  const supabase = window.supabaseClient;
+  if (!supabase) return;
+  
+  // Vérifier si le compte admin existe déjà
+  const { data: existingUsers, error: searchError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'admin');
+    
+  if (searchError) {
+    console.error("Erreur lors de la recherche d'administrateurs:", searchError);
+    return;
+  }
+  
+  // Si aucun admin n'existe, créer le compte
+  if (!existingUsers || existingUsers.length === 0) {
+    try {
+      // Créer l'utilisateur admin
+      const { data, error } = await supabase.auth.signUp({
+        email: 'pierocarlo@gmx.fr',
+        password: 'aslaugaruda',
+        options: {
+          data: {
+            name: 'Pierocarlo',
+            type: 'admin'
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Ajouter le profil avec le rôle admin
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: data.user.id,
+            name: 'Pierocarlo',
+            type: 'admin',
+            role: 'admin'
+          }
+        ]);
         
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
-          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Recommandations pour le placement</label>
-          <textarea id="dogRecommendations" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Type d'élevage recommandé, expérience requise de l'éleveur...">${dog.recommendations || ''}</textarea>
-        </div>
-        
-        <button type="submit" id="submitEvaluationBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-          Enregistrer l'évaluation
+      if (profileError) throw profileError;
+      
+      console.log('Compte administrateur créé avec succès.');
+    } catch (error) {
+      console.error("Erreur lors de la création du compte administrateur:", error);
+    }
+  }
+}
+
+// Appel de la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', setupAdminAccount);
+}
+
+// Ajouter la fonction pour gérer la suppression d'un chien
+async function confirmDeleteDog(dog, container) {
+  // Créer une modale de confirmation
+  const confirmModal = document.createElement('div');
+  confirmModal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+  confirmModal.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50" id="confirmOverlay"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmation de suppression</h3>
+      <p class="text-gray-700">Êtes-vous sûr de vouloir supprimer définitivement le chien <strong>${dog.nom}</strong> ?</p>
+      <p class="mt-2 text-sm text-red-600">Cette action est irréversible et supprimera toutes les données associées.</p>
+      
+      <div class="mt-6 flex justify-end space-x-4">
+        <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 transition">
+          Annuler
         </button>
-      </form>
+        <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition">
+          Supprimer
+        </button>
+      </div>
     </div>
-    `;
+  `;
+  
+  document.body.appendChild(confirmModal);
+  document.body.style.overflow = 'hidden';
+  
+  // Gestionnaires d'événements pour les boutons
+  document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+    document.body.removeChild(confirmModal);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('confirmOverlay').addEventListener('click', () => {
+    document.body.removeChild(confirmModal);
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    const supabase = window.supabaseClient;
+    if (!supabase) {
+      showMessage("Erreur de connexion au service", "error");
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      return;
+    }
+    
+    try {
+      // Changer le bouton en indicateur de chargement
+      const confirmBtn = document.getElementById('confirmDeleteBtn');
+      confirmBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+      confirmBtn.disabled = true;
+      
+      // Supprimer d'abord les messages associés au chien
+      await supabase
+        .from('dog_messages')
+        .delete()
+        .eq('chien_id', dog.id);
+      
+      // Supprimer les demandes d'évaluation associées
+      await supabase
+        .from('evaluation_requests')
+        .delete()
+        .eq('chien_id', dog.id);
+      
+      // Supprimer la photo du chien si elle existe
+      if (dog.photo_url) {
+        try {
+          // Extraire le nom du fichier de l'URL
+          const fileName = dog.photo_url.split('/').pop();
+          if (fileName) {
+            await supabase.storage
+              .from('photos')
+              .remove([fileName]);
+          }
+        } catch (photoError) {
+          console.error("Erreur lors de la suppression de la photo:", photoError);
+          // Continuer malgré l'erreur
+        }
+      }
+      
+      // Enfin, supprimer le chien
+      const { error } = await supabase
+        .from('chiens')
+        .delete()
+        .eq('id', dog.id);
+      
+      if (error) throw error;
+      
+      // Fermer la modale
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      
+      // Afficher un message de succès
+      showMessage(`Le chien ${dog.nom} a été supprimé avec succès.`, 'success');
+      
+      // Recharger les données d'administration
+      loadAdminData(container);
+      
+    } catch (error) {
+      console.error("Erreur lors de la suppression du chien:", error);
+      document.body.removeChild(confirmModal);
+      document.body.style.overflow = '';
+      showMessage(`Erreur lors de la suppression: ${error.message}`, 'error');
+    }
+  });
+  
+  // Vérifier si le panel admin existe déjà, sinon le créer
+  let adminContent = document.getElementById('admin-content');
+  if (!adminContent) {
+    adminContent = document.createElement('div');
+    adminContent.id = 'admin-content';
+    document.getElementById('mainContent').appendChild(adminContent);
+  }
+  
+  // Afficher le panel admin
+  adminContent.classList.remove('hidden');
+  
+  // Charger les données à administrer
+  loadAdminData(adminContent);
+}
+
+// Charger les données pour l'administration
+async function loadAdminData(container) {
+  const supabase = window.supabaseClient;
+  
+  // Afficher un loader
+  container.innerHTML = `
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Panneau d'administration</h2>
+    <div class="flex justify-center">
+      <div class="w-12 h-12 border-4 border-basque-red border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  `;
   
   document.body.appendChild(content);
   document.body.style.overflow = 'hidden';
@@ -166,183 +363,6 @@ async function isAdmin(user) {
       showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
     }
   });
-}
-
-// Ajouter la fonction pour gérer la suppression d'un chien
-async function confirmDeleteDog(dog, container) {
-  // Créer une modale de confirmation
-  const confirmModal = document.createElement('div');
-  confirmModal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
-  confirmModal.innerHTML = `
-    <div class="fixed inset-0 bg-black bg-opacity-50" id="confirmOverlay"></div>
-    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmation de suppression</h3>
-      <p class="text-gray-700">Êtes-vous sûr de vouloir supprimer définitivement le chien <strong>${dog.nom}</strong> ?</p>
-      <p class="mt-2 text-sm text-red-600">Cette action est irréversible et supprimera toutes les données associées.</p>
-      
-      <div class="mt-6 flex justify-end space-x-4">
-        <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 transition">
-          Annuler
-        </button>
-        <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition">
-          Supprimer
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(confirmModal);
-  document.body.style.overflow = 'hidden';
-  
-  // Gestionnaires d'événements pour les boutons
-  document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-    document.body.removeChild(confirmModal);
-    document.body.style.overflow = '';
-  });
-  
-  document.getElementById('confirmOverlay').addEventListener('click', () => {
-    document.body.removeChild(confirmModal);
-    document.body.style.overflow = '';
-  });
-  
-  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-    const supabase = window.supabaseClient;
-    if (!supabase) {
-      showMessage("Erreur de connexion au service", "error");
-      document.body.removeChild(confirmModal);
-      document.body.style.overflow = '';
-      return;
-    }
-    
-    try {
-      // Changer le bouton en indicateur de chargement
-      const confirmBtn = document.getElementById('confirmDeleteBtn');
-      confirmBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-      confirmBtn.disabled = true;
-      
-      // Supprimer d'abord les messages associés au chien
-      await supabase
-        .from('dog_messages')
-        .delete()
-        .eq('chien_id', dog.id);
-      
-      // Supprimer les demandes d'évaluation associées
-      await supabase
-        .from('evaluation_requests')
-        .delete()
-        .eq('chien_id', dog.id);
-      
-      // Supprimer la photo du chien si elle existe
-      if (dog.photo_url) {
-        try {
-          // Extraire le nom du fichier de l'URL
-          const fileName = dog.photo_url.split('/').pop();
-          if (fileName) {
-            await supabase.storage
-              .from('photos')
-              .remove([fileName]);
-          }
-        } catch (photoError) {
-          console.error("Erreur lors de la suppression de la photo:", photoError);
-          // Continuer malgré l'erreur
-        }
-      }
-      
-      // Enfin, supprimer le chien
-      const { error } = await supabase
-        .from('chiens')
-        .delete()
-        .eq('id', dog.id);
-      
-      if (error) throw error;
-      
-      // Fermer la modale
-      document.body.removeChild(confirmModal);
-      document.body.style.overflow = '';
-      
-      // Afficher un message de succès
-      showMessage(`Le chien ${dog.nom} a été supprimé avec succès.`, 'success');
-      
-      // Recharger les données d'administration
-      loadAdminData(container);
-      
-    } catch (error) {
-      console.error("Erreur lors de la suppression du chien:", error);
-      document.body.removeChild(confirmModal);
-      document.body.style.overflow = '';
-      showMessage(`Erreur lors de la suppression: ${error.message}`, 'error');
-    }
-  });
-}
-
- = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-    
-  if (error || !data) return false;
-  
-  return data.role === 'admin';
-}
-
-// Fonction pour afficher l'interface d'administration
-async function showAdminPanel() {
-  const supabase = window.supabaseClient;
-  if (!supabase) {
-    console.error("Supabase n'est pas initialisé");
-    showMessage("Erreur de connexion au service", "error");
-    return;
-  }
-  
-  // Vérifier si l'utilisateur est connecté et admin
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    showMessage('Vous devez être connecté pour accéder à cette page.', 'warning');
-    showTab('profil');
-    return;
-  }
-  
-  // Vérifier strictement si l'utilisateur est l'admin pierocarlo@gmx.fr ou a le rôle admin
-  const adminStatus = await isAdmin(user);
-  if (!adminStatus) {
-    showMessage('Vous n\'avez pas les autorisations nécessaires pour accéder à cette page.', 'error');
-    showTab('accueil');
-    return;
-  }
-  
-  // Créer l'interface d'administration
-  // Cacher tous les contenus existants
-  document.querySelectorAll('#mainContent > div').forEach(div => {
-    div.classList.add('hidden');
-  });
-  
-  // Vérifier si le panel admin existe déjà, sinon le créer
-  let adminContent = document.getElementById('admin-content');
-  if (!adminContent) {
-    adminContent = document.createElement('div');
-    adminContent.id = 'admin-content';
-    document.getElementById('mainContent').appendChild(adminContent);
-  }
-  
-  // Afficher le panel admin
-  adminContent.classList.remove('hidden');
-  
-  // Charger les données à administrer
-  loadAdminData(adminContent);
-}
-
-// Charger les données pour l'administration
-async function loadAdminData(container) {
-  const supabase = window.supabaseClient;
-  
-  // Afficher un loader
-  container.innerHTML = `
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Panneau d'administration</h2>
-    <div class="flex justify-center">
-      <div class="w-12 h-12 border-4 border-basque-red border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  `;
   
   try {
     // Récupérer tous les chiens à évaluer
@@ -424,6 +444,45 @@ async function loadAdminData(container) {
                   </td>
                 </tr>
               `).join('')}
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
+            <div class="flex items-center mt-1">
+              ${[1, 2, 3, 4, 5].map(value => `
+                <label class="mx-2 flex flex-col items-center">
+                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
+                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
+                    ${value}
+                  </span>
+                  <span class="text-xs mt-1">${
+                    value === 1 ? 'Calme' : 
+                    value === 3 ? 'Modérée' : 
+                    value === 5 ? 'Très actif' : ''
+                  }</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
+          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Recommandations pour le placement</label>
+          <textarea id="dogRecommendations" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Type d'élevage recommandé, expérience requise de l'éleveur...">${dog.recommendations || ''}</textarea>
+        </div>
+        
+        <button type="submit" id="submitEvaluationBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
+          Enregistrer l'évaluation
+        </button>
+      </form>
+    </div>
+  `;}
             </tbody>
           </table>
         </div>
@@ -779,6 +838,4 @@ function showDogEvaluationForm(dog) {
                     value === 5 ? 'Très sociable' : ''
                   }</span>
                 </label>
-              `).join('')}
-            </div>
-          </div>
+              `).join('')

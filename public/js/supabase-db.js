@@ -1128,3 +1128,230 @@ if (typeof showMessage !== 'function') {
     }, 3000);
   };
 }
+// CODE À AJOUTER AU FICHIER supabase-db.js POUR LA RECHERCHE ET LE FILTRE
+
+// Fonction pour la recherche de chiens
+function searchDogs(query, filters = {}) {
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("Supabase n'est pas initialisé");
+    return Promise.reject("Erreur de connexion à la base de données");
+  }
+  
+  let supabaseQuery = supabase
+    .from('chiens')
+    .select('*');
+  
+  // Ajouter la recherche textuelle si fournie
+  if (query && query.trim() !== '') {
+    // Recherche sur les champs pertinents
+    supabaseQuery = supabaseQuery.or(`nom.ilike.%${query}%,race.ilike.%${query}%,description.ilike.%${query}%,localisation.ilike.%${query}%`);
+  }
+  
+  // Ajouter les filtres
+  if (filters.race && filters.race !== '') {
+    supabaseQuery = supabaseQuery.ilike('race', `%${filters.race}%`);
+  }
+  
+  if (filters.age && filters.age !== '') {
+    if (filters.age === 'junior') {
+      supabaseQuery = supabaseQuery.or('age.ilike.%mois%,age.ilike.%1 an%');
+    } else if (filters.age === 'adulte') {
+      supabaseQuery = supabaseQuery.or('age.ilike.%2 ans%,age.ilike.%3 ans%,age.ilike.%4 ans%,age.ilike.%5 ans%');
+    } else if (filters.age === 'senior') {
+      supabaseQuery = supabaseQuery.gt('age', '5 ans');
+    }
+  }
+  
+  if (filters.statut && filters.statut !== '') {
+    supabaseQuery = supabaseQuery.eq('statut', filters.statut);
+  }
+  
+  // Trier par date de création (plus récent d'abord)
+  supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
+  
+  return supabaseQuery;
+}
+
+// Fonction pour mettre à jour l'affichage des chiens après recherche/filtre
+async function updateDogsDisplay(query = '', filters = {}) {
+  const allContainer = document.getElementById('all-chiens-container');
+  
+  if (!allContainer) {
+    console.error("Le conteneur des chiens n'a pas été trouvé");
+    return;
+  }
+  
+  // Vider le conteneur
+  allContainer.innerHTML = '';
+  
+  try {
+    // Afficher un indicateur de chargement
+    allContainer.innerHTML = `
+      <div class="col-span-full flex justify-center py-8">
+        <div class="w-10 h-10 border-4 border-basque-red border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    `;
+    
+    const { data: chiensBdd, error } = await searchDogs(query, filters);
+    
+    // Vider à nouveau le conteneur après le chargement
+    allContainer.innerHTML = '';
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Si aucun chien n'est trouvé
+    if (!chiensBdd || chiensBdd.length === 0) {
+      allContainer.innerHTML = `
+        <div class="col-span-full p-6 bg-yellow-50 rounded-lg text-center">
+          <p class="text-yellow-700">Aucun chien ne correspond à votre recherche.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Créer les cartes pour les chiens trouvés
+    chiensBdd.forEach((chien) => {
+      const card = createDogCard(chien);
+      allContainer.appendChild(card);
+    });
+    
+  } catch (error) {
+    console.error("Erreur lors de la recherche des chiens:", error);
+    allContainer.innerHTML = `
+      <div class="col-span-full p-6 bg-red-50 rounded-lg text-center">
+        <p class="text-red-700">Une erreur s'est produite lors de la recherche. Veuillez réessayer.</p>
+      </div>
+    `;
+  }
+}
+
+// Ajout des écouteurs d'événements pour la recherche et le filtre
+document.addEventListener('DOMContentLoaded', () => {
+  // Pour la barre de recherche dans le header
+  const searchInput = document.querySelector('.relative.rounded-full.bg-gray-100 input');
+  if (searchInput) {
+    // Recherche en tapant (avec debounce)
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.trim();
+        
+        // Si l'onglet chiens n'est pas actif, l'activer
+        if (document.getElementById('chiens-content').classList.contains('hidden')) {
+          showTab('chiens');
+        }
+        
+        // Récupérer les filtres actuels
+        const filters = getCurrentFilters();
+        
+        // Mettre à jour l'affichage
+        updateDogsDisplay(query, filters);
+      }, 500); // Attendre 500ms après que l'utilisateur ait arrêté de taper
+    });
+    
+    // Recherche en appuyant sur Entrée
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = e.target.value.trim();
+        
+        // Si l'onglet chiens n'est pas actif, l'activer
+        if (document.getElementById('chiens-content').classList.contains('hidden')) {
+          showTab('chiens');
+        }
+        
+        // Récupérer les filtres actuels
+        const filters = getCurrentFilters();
+        
+        // Mettre à jour l'affichage
+        updateDogsDisplay(query, filters);
+      }
+    });
+  }
+  
+  // Pour le bouton de filtre
+  const filterBtn = document.getElementById('filterBtn');
+  if (filterBtn) {
+    filterBtn.addEventListener('click', toggleFilter);
+  }
+});
+
+// Fonction pour récupérer les filtres actuels
+function getCurrentFilters() {
+  const filters = {};
+  
+  const raceSelect = document.querySelector('#filter-panel select[data-filter="race"]');
+  if (raceSelect) filters.race = raceSelect.value;
+  
+  const ageSelect = document.querySelector('#filter-panel select[data-filter="age"]');
+  if (ageSelect) filters.age = ageSelect.value;
+  
+  const statutSelect = document.querySelector('#filter-panel select[data-filter="statut"]');
+  if (statutSelect) filters.statut = statutSelect.value;
+  
+  return filters;
+}
+
+// Fonction modifiée pour afficher le panneau de filtre
+function toggleFilter() {
+  const filterPanel = document.getElementById('filter-panel');
+  if (filterPanel.classList.contains('hidden')) {
+    filterPanel.classList.remove('hidden');
+    filterPanel.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Race</label>
+          <select data-filter="race" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+            <option value="">Toutes les races</option>
+            <option value="Border Collie">Border Collie</option>
+            <option value="Berger des Pyrénées">Berger des Pyrénées</option>
+            <option value="Berger Australien">Berger Australien</option>
+            <option value="Kelpie">Kelpie</option>
+            <option value="Beauceron">Beauceron</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Âge</label>
+          <select data-filter="age" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+            <option value="">Tous les âges</option>
+            <option value="junior">Moins de 2 ans</option>
+            <option value="adulte">2 à 5 ans</option>
+            <option value="senior">Plus de 5 ans</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+          <select data-filter="statut" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent">
+            <option value="">Tous les statuts</option>
+            <option value="Disponible">Disponible</option>
+            <option value="En évaluation">En évaluation</option>
+            <option value="Évalué">Évalué</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button id="applyFiltersBtn" class="px-4 py-2 rounded-lg font-medium text-white bg-basque-red hover:bg-basque-red-dark transition">
+          Appliquer les filtres
+        </button>
+      </div>
+    `;
+    
+    // Ajouter l'écouteur d'événement pour le bouton d'application des filtres
+    document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+      const filters = getCurrentFilters();
+      
+      // Récupérer la valeur de recherche actuelle
+      const searchInput = document.querySelector('.relative.rounded-full.bg-gray-100 input');
+      const query = searchInput ? searchInput.value.trim() : '';
+      
+      // Mettre à jour l'affichage
+      updateDogsDisplay(query, filters);
+    });
+  } else {
+    filterPanel.classList.add('hidden');
+  }
+}

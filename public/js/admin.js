@@ -78,124 +78,7 @@ async function loadAdminData(container) {
     <div class="flex justify-center">
       <div class="w-12 h-12 border-4 border-basque-red border-t-transparent rounded-full animate-spin"></div>
     </div>
-  
-  document.body.appendChild(content);
-  document.body.style.overflow = 'hidden';
-  
-  // Ajouter du style pour la sélection des notes
-  const styleElement = document.createElement('style');
-  styleElement.textContent = `
-    input[type="radio"][name="dogObedience"]:checked + span,
-    input[type="radio"][name="dogInstinct"]:checked + span,
-    input[type="radio"][name="dogSociability"]:checked + span,
-    input[type="radio"][name="dogEnergy"]:checked + span {
-      background-color: #D0202A;
-      color: white;
-    }
-    
-    input[type="radio"] + span:hover {
-      background-color: #e0e0e0;
-    }
-  `;
-  document.head.appendChild(styleElement);
-  
-  // Gestionnaire d'événements pour fermer le formulaire
-  document.getElementById('closeEvaluationBtn').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-    document.head.removeChild(styleElement);
-  });
-  
-  document.getElementById('evaluationOverlay').addEventListener('click', () => {
-    document.body.removeChild(content);
-    document.body.style.overflow = '';
-    document.head.removeChild(styleElement);
-  });
-  
-  // Gestionnaires pour les boutons de notation
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      // Réinitialiser tous les boutons du même groupe
-      const name = e.target.name;
-      document.querySelectorAll(`input[name="${name}"] + span`).forEach(span => {
-        span.classList.remove('bg-basque-red', 'text-white');
-        span.classList.add('bg-gray-200');
-      });
-      
-      // Mettre en évidence le bouton sélectionné
-      const selectedSpan = e.target.nextElementSibling;
-      selectedSpan.classList.remove('bg-gray-200');
-      selectedSpan.classList.add('bg-basque-red', 'text-white');
-    });
-  });
-  
-  // Soumission du formulaire
-  document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const status = document.getElementById('dogStatus').value;
-    const evaluation = document.getElementById('dogEvaluation').value;
-    const obedience = document.querySelector('input[name="dogObedience"]:checked')?.value || 3;
-    const instinct = document.querySelector('input[name="dogInstinct"]:checked')?.value || 3;
-    const sociability = document.querySelector('input[name="dogSociability"]:checked')?.value || 3;
-    const energy = document.querySelector('input[name="dogEnergy"]:checked')?.value || 3;
-    const recommendations = document.getElementById('dogRecommendations').value;
-    
-    // Valider les données
-    if (status === 'Évalué' && !evaluation) {
-      showMessage('Veuillez fournir une évaluation pour ce chien.', 'warning');
-      return;
-    }
-    
-    // Changer le bouton en indicateur de chargement
-    const submitBtn = document.getElementById('submitEvaluationBtn');
-    submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-    submitBtn.disabled = true;
-    
-    try {
-      const supabase = window.supabaseClient;
-      if (!supabase) throw new Error("Supabase n'est pas initialisé");
-      
-      // Préparer les données de mise à jour
-      const updateData = {
-        statut: status,
-        evaluation: status === 'Évalué' ? evaluation : (status === 'En évaluation' ? 'En cours' : 'Non évalué'),
-        obedience: parseInt(obedience),
-        instinct: parseInt(instinct),
-        sociability: parseInt(sociability),
-        energy: parseInt(energy),
-        recommendations
-      };
-      
-      // Mettre à jour le chien dans la base de données
-      const { error } = await supabase
-        .from('chiens')
-        .update(updateData)
-        .eq('id', dog.id);
-      
-      if (error) throw error;
-      
-      // Fermer le formulaire et afficher un message de succès
-      document.body.removeChild(content);
-      document.body.style.overflow = '';
-      document.head.removeChild(styleElement);
-      
-      showMessage('L\'évaluation du chien a été enregistrée avec succès.', 'success');
-      
-      // Rafraîchir les données du panneau admin
-      const adminContent = document.getElementById('admin-content');
-      if (adminContent) {
-        loadAdminData(adminContent);
-      }
-      
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement de l'évaluation:", error);
-      submitBtn.textContent = 'Enregistrer l\'évaluation';
-      submitBtn.disabled = false;
-      showMessage('Une erreur s\'est produite. Veuillez réessayer.', 'error');
-    }
-  });
-}
+  `; // Correction ici: ajout du backtick fermant
   
   try {
     // Récupérer tous les chiens à évaluer
@@ -249,76 +132,7 @@ async function loadAdminData(container) {
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <label class="mx-2 flex flex-col items-center">
-                  <input type="radio" name="dogInstinct" value="${value}" class="hidden" ${(dog.instinct || 3) == value ? 'checked' : ''}>
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.instinct || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
-                    ${value}
-                  </span>
-                  <span class="text-xs mt-1">${
-                    value === 1 ? 'Faible' : 
-                    value === 3 ? 'Moyen' : 
-                    value === 5 ? 'Fort' : ''
-                  }</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Sociabilité (1-5)</label>
-            <div class="flex items-center mt-1">
-              ${[1, 2, 3, 4, 5].map(value => `
-                <label class="mx-2 flex flex-col items-center">
-                  <input type="radio" name="dogSociability" value="${value}" class="hidden" ${(dog.sociability || 3) == value ? 'checked' : ''}>
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.sociability || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
-                    ${value}
-                  </span>
-                  <span class="text-xs mt-1">${
-                    value === 1 ? 'Craintif' : 
-                    value === 3 ? 'Normal' : 
-                    value === 5 ? 'Très sociable' : ''
-                  }</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Énergie (1-5)</label>
-            <div class="flex items-center mt-1">
-              ${[1, 2, 3, 4, 5].map(value => `
-                <label class="mx-2 flex flex-col items-center">
-                  <input type="radio" name="dogEnergy" value="${value}" class="hidden" ${(dog.energy || 3) == value ? 'checked' : ''}>
-                  <span class="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${(dog.energy || 3) == value ? 'bg-basque-red text-white' : 'bg-gray-200'}">
-                    ${value}
-                  </span>
-                  <span class="text-xs mt-1">${
-                    value === 1 ? 'Calme' : 
-                    value === 3 ? 'Modérée' : 
-                    value === 5 ? 'Très actif' : ''
-                  }</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Résultat de l'évaluation</label>
-          <textarea id="dogEvaluation" rows="6" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Détaillez votre évaluation du chien...">${dog.evaluation !== 'Non évalué' && dog.evaluation !== 'En cours' ? dog.evaluation : ''}</textarea>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Recommandations pour le placement</label>
-          <textarea id="dogRecommendations" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-basque-red focus:border-transparent" placeholder="Type d'élevage recommandé, expérience requise de l'éleveur...">${dog.recommendations || ''}</textarea>
-        </div>
-        
-        <button type="submit" id="submitEvaluationBtn" class="w-full px-4 py-2 rounded-lg font-medium text-white bg-basque-green hover:bg-basque-green-dark transition">
-          Enregistrer l'évaluation
-        </button>
-      </form>
-    </div>
-  `;<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Race</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -589,7 +403,7 @@ async function loadAdminData(container) {
       </div>
     `;
     
-    document.getElementById('retry-admin-btn').addEventListener('click', () => {
+    document.getElementById('retry-admin-btn')?.addEventListener('click', () => {
       loadAdminData(container);
     });
   }
